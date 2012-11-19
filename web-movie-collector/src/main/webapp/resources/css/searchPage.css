@@ -1,0 +1,26 @@
+@font-face {
+	font-family: 'Oswald';
+	src: url('oswald.eot');
+	src: url('oswald.eot?#iefix') format('embedded-opentype'),
+		url('oswald.woff') format('woff'), url('oswald.ttf')
+		format('truetype'), url('oswald.svg#oswald') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+#searchPage frm{
+	border: 1px solid black;
+}
+#searchPage #titleInput{
+	border:1px solid green;
+}
+#searchPage #serarchResults{
+	border:1px solid red;
+}
+#searchPage #infoSources{
+	border:1px solid blue;
+}
+#searchPage .movie-title{
+	display:inline-block;
+	width:75%;
+}

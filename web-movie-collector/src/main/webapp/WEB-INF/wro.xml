@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<groups xmlns="http://www.isdc.ro/wro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.isdc.ro/wro wro.xsd">
+
+  <group name="bootstrap">
+  	<js>/resources/js/thirdparty/modernizr/modernizr-2.5.2.min.js</js>
+  </group>
+  
+  <group name="commons">
+    <!-- Common styles -->
+    <css>/resources/js/thirdparty/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.min.css</css>
+    <css>/resources/css/thirdparty/jquery.layout/layout-default-latest.css</css>
+    
+    <!-- Common scripts -->
+    <js>/resources/js/thirdparty/inheritance/inheritance-1.0.min.js</js>
+    <js>/resources/js/thirdparty/jquery/jquery-1.8.2.min.js</js>
+    <js>/resources/js/thirdparty/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js</js>
+    <js>/resources/js/thirdparty/jquery.layout/jquery.layout-latest.min.js</js>
+    <js>/resources/js/thirdparty/crystalline/jquery.json2html-3.1.js</js>
+    <js>/resources/js/thirdparty/atmosphere/jquery.atmosphere-1.0.js</js>
+    <js>/resources/js/base.js</js>
+  </group>
+
+  <group name="searchPage">
+    <css>/resources/css/tooltip.customized-0.1.css</css>
+    <css>/resources/css/searchPage.css</css>
+    <js>/resources/js/tooltip.customized-0.1.js</js>
+    <js>/resources/js/searchPage.js</js>
+  </group>
+</groups>
