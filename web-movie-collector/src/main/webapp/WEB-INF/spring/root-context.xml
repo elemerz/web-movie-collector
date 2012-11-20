@@ -12,11 +12,9 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
 		<property name="modelUpdatePeriod" value="0" />
 	</bean>
 
-	<bean id="movieURLMapper" class="ro.isdc.wmc.model.MovieURLMapper">
-		<property name="urlMap">
-			<bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-				<property name="location" value="websites.properties" />
-			</bean>
+	<bean id="initApp" class="ro.isdc.wmc.init.InfoSourceConfig" init-method="load" scope="singleton">
+		<property name="configPath">
+			<value>sitesConfig.json</value>
 		</property>
 	</bean>
 </beans>

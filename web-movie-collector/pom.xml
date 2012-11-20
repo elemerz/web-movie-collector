@@ -245,7 +245,7 @@
 			     </execution>
 			    </executions>
 			    <configuration>
-			     <minimize>true</minimize>
+			     <minimize>false</minimize>
 			     <destinationFolder>${basedir}/src/main/webapp/resources/wro</destinationFolder>
 			     <contextFolder>${basedir}/src/main/webapp/</contextFolder>
 			     <wroFile>${basedir}/src/main/webapp/WEB-INF/wro.xml</wroFile>
