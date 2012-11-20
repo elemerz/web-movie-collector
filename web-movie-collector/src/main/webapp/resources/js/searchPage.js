@@ -25,9 +25,8 @@
 		
 		srcMoviesAtm: function(e) {
             
-			var socket = $.atmosphere;
-			
-			var that= this,
+			var socket = $.atmosphere,			
+			that= this,
 			$el = $(e.target), 
 			movieData = {
 			"sites" : [],
@@ -35,33 +34,51 @@
 			}, 
 			movieTitle = $('.search-bar').val(), 
 			contentArea = $('#content-area'), 
-			searchItemTmpl = $('#searchItemTmpl').val();
+			searchItemTmpl = $('#searchItemTmpl').val(),
+			request,
+			subSocket;
 
-		// map all the checked checkboxes' values into an array
-		movieData.sites = $('#infoSources :checked').map(function() {
-			return this.value;
-		}).get();
-		if (movieData.sites.length === 0) {
-			window.alert('Please select a website to search on...');
-			return false;
-		}
-		// put the search term into the movieData object
-		movieData.movies.push($('.movie-title').val());
-		if (movieData.movies.length === 0) {
-			window.alert('Please fill the search term');
-			return false;
-		}
+			// map all the checked checkboxes' values into an array
+			movieData.sites = $('#infoSources :checked').map(function() {
+				return this.value;
+			}).get();
+			if (movieData.sites.length === 0) {
+				window.alert('Please select a website to search on...');
+				return false;
+			}
+			// put the search term into the movieData object
+			movieData.movies.push($('.movie-title').val());
+			if (movieData.movies.length === 0) {
+				window.alert('Please fill the search term');
+				return false;
+			}
             
-            var request = new $.atmosphere.AtmosphereRequest();
+            request = new $.atmosphere.AtmosphereRequest();
             request.transport = "websocket";
             request.url = 'http://localhost:8080/srcMoviesAtm';
             request.contentType = "application/json";
-            request.data = JSON.stringify(movieData),
+            request.data = JSON.stringify(movieData);
             request.fallbackTransport = "long-polling";
             request.method = "POST";
             request.dataType = "text";
             //request.callback = buildTemplate;
             
+            function buildTemplate(response){
+            	
+                $.atmosphere.log('info', ["response.state: " + response.state]);
+                $.atmosphere.log('info', ["response.transport: " + response.transport]);
+                $.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
+                
+                if(response.state === "messageReceived"){
+                	var tooltipData = JSON.stringify($.parseJSON(response.responseBody).basicMoviesArray);
+					$(searchItemTmpl.tmpl({
+						"label" : movieTitle
+					})).appendTo(contentArea).children().attr('data-tooltipmsg', tooltipData).tooltip();
+
+					that.briefMovieInfo = response.responseBody.basicMoviesArray;
+            	}
+            }
+
             request.onMessage = function(response){
             	
                 buildTemplate(response);
@@ -75,24 +92,9 @@
             request.onError =  function() { alert("error");$.atmosphere.log('info', ['socket error']); };
             request.onReconnect =  function() { $.atmosphere.log('info', ['socket reconnect']); };
 
-            var subSocket = socket.subscribe(request);
+            subSocket = socket.subscribe(request);
             
-            function buildTemplate(response){
-            	
-                $.atmosphere.log('info', ["response.state: " + response.state]);
-                $.atmosphere.log('info', ["response.transport: " + response.transport]);
-                $.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
-                
-                if(response.state = "messageReceived"){
-                
-                	var tooltipData = JSON.stringify($.parseJSON(response.responseBody).basicMoviesArray);
-					$(searchItemTmpl.tmpl({
-						"label" : movieTitle
-					})).appendTo(contentArea).children().attr('data-tooltipmsg', tooltipData).tooltip();
-
-					that.briefMovieInfo = response.responseBody.basicMoviesArray;
-            	}
-            }
+            
         },
 		/** On click event handler for Add Item button */
 		addSearchItem : function(e) {
