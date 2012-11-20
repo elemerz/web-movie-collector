@@ -2,7 +2,7 @@ package ro.isdc.wmc.model;
 
 import java.util.ArrayList;
 
-public class SearchRequestModel {
+public class SearchInputModel {
 	
 	private ArrayList<String> movies = new ArrayList<String>();
 	private ArrayList<String> sites = new ArrayList<String>();
