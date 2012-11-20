@@ -13,7 +13,6 @@
 	<c:if test="${not empty pageName}">
 		<link rel="stylesheet" type="text/css" href="${wroCtx}/${pageName}.css" media="all" />
 	</c:if>
-	<script src="${wroCtx}/bootstrap.js?minimize=false"></script> 
 </head>
 
 <body id="${pageName}" class="layout-container">

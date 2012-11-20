@@ -93,29 +93,66 @@
 
 .ie7 .tooltip-content .total-price .right {
 	margin-top: -30px;
-}@font-face {
-	font-family: 'Oswald';
-	src: url('../resources/css/oswald.eot');
-	src: url('../resources/css/oswald.eot?#iefix') format('embedded-opentype'),
-		url('oswald.woff') format('woff'), url('oswald.ttf')
-		format('truetype'), url('oswald.svg#oswald') format('svg');
-	font-weight: normal;
-	font-style: normal;
+}/*
+ * jQuery message plug-in 1.0
+ *
+ * http://bassistance.de/jquery-plugins/jquery-plugin-message/
+ *
+ * Copyright (c) 2009 Jörn Zaefferer
+ *
+ * $Id$
+ *
+ * Dual licensed under the MIT and GPL licenses:
+ *   http://www.opensource.org/licenses/mit-license.php
+ *   http://www.gnu.org/licenses/gpl.html
+ */
+.jquery-message {
+    font: normal 20px / 50px Helvetica, Arial, Sans-Serif;
+    letter-spacing: -1px;
+    position: absolute;
+		bottom: 50px;
+    left: 25%;
+    width: 50%;
+    color: white;
+    background-color: black;
+    text-align: center;
+    display: none;
+    opacity: 0.8;
+    z-index: 100000;
 }
 
-#searchPage frm{
-	border: 1px solid black;
+.jquery-message .round {
+    border-left: solid 2px white;
+    border-right: solid 2px white;
+    font-size: 1px;
+    height: 2px;
 }
-#searchPage #titleInput{
-	border:1px solid green;
+
+.jquery-message p {
+    padding: .3em;
+    display: inline;
 }
-#searchPage #serarchResults{
-	border:1px solid red;
+
+.jquery-message a {
+    display: none;
+}#searchPage h2 {
+	font-size:140%;
+	font-weight: bold;
 }
-#searchPage #infoSources{
-	border:1px solid blue;
-}
-#searchPage .movie-title{
-	display:inline-block;
+#searchPage .inputs .user-input {
+	float:left;
+	height: 90%;
 	width:75%;
+}
+#searchPage .inputs button.user-input {
+	float:right;
+	height: 100%;
+	width:24.5%;
+}
+#searchPage .inputs .movie-title {
+	border:1px solid #bbb;
+	font-size:150%;
+}
+#searchPage .info-sources li{
+	float:left;
 }

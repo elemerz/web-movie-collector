@@ -199,9 +199,10 @@
 	$('.tooltip-aware').tooltip();
 	
 }(jQuery));
-(function($, NS, SuperClass, SubClass) {
+(function(e){function s(n){t||(t=e(e.message.defaults.template).appendTo(document.body),e(window).bind("mousemove click keypress",o)),t[n?"addClass":"removeClass"]("jquery-error")}function o(){t.is(":visible")&&!t.is(":animated")&&!n&&t.animate({opacity:0},e.message.defaults.fadeOutDuration,function(){e(this).hide()})}var t,n,r,i;e.fn.message=function(u,a){u=e.trim(u||this.text());if(!u)return;clearTimeout(r),clearTimeout(i),s(a),t.find("p").html(u),t.show().animate({opacity:e.message.defaults.opacity},e.message.defaults.fadeInDuration),n=!0,active=!1,r=setTimeout(function(){n=!1},e.message.defaults.minDuration+e.message.defaults.displayDurationPerCharacter*Math.sqrt(u.length)),i=setTimeout(o,e.message.defaults.totalTimeout)},e.message={},e.message.defaults={opacity:.8,fadeOutDuration:500,fadeInDuration:200,displayDurationPerCharacter:125,minDuration:2500,totalTimeout:6e3,template:'<div class="jquery-message"><div class="round"></div><p></p><div class="round"></div></div>'}})(jQuery);(function($, NS, SuperClass, SubClass) {
 	window[NS][SubClass] = window[NS][SubClass] || window[NS][SuperClass].extend({
 		$ctx: $('#searchPage'),
+		$msg: $('#searchPage .messages'),
 		// used to store the data for the tooltip
 		dataArray : [],
 		// used to store the data for the detailed info of the movies
@@ -220,63 +221,81 @@
 		},
 		
 		/**Renders the page's dynamic layout*/
-		doLayout: function(){
-			$('body').layout();
+		doLayout : function(e) {
+			var cfgLayout = {
+				spacing_open:3,
+				spacing_closed:3,
+				north : {
+					resizable : false,
+					closable : false
+				},
+				south : {
+					resizable : false,
+					closable : false
+				}
+			};
+			this.$ctx.layout(cfgLayout);
+			$('.layout-inner').layout($.extend({},cfgLayout,{
+				east:{
+					size:.66
+				}
+			}));
+			$('.user-input-zone').layout(cfgLayout);
 		},
 		
+		/***/
 		srcMoviesAtm: function(e) {
             
-			var socket = $.atmosphere;
-			
 			var that= this,
-			$el = $(e.target), 
-			movieData = {
-			"sites" : [],
-			"movies" : []
-			}, 
-			movieTitle = $('.search-bar').val(), 
-			contentArea = $('#content-area'), 
-			searchItemTmpl = $('#searchItemTmpl').val();
+				socket = $.atmosphere,
+				request=null,
+				$el = $(e.target), 
+				movieData = {
+				"sites" : [],
+				"movies" : []
+				}, 
+				movieTitle = $('.movie-title',this.$ctx).val(), 
+				contentArea = $('.search-results',this.$ctx), 
+				searchItemTmpl = $('#searchItemTmpl').val();
 
 		// map all the checked checkboxes' values into an array
-		movieData.sites = $('#infoSources :checked').map(function() {
+		movieData.sites = $('.info-sources :checked',this.$ctx).map(function() {
 			return this.value;
 		}).get();
 		if (movieData.sites.length === 0) {
-			window.alert('Please select a website to search on...');
+			$().message(this.$msg.data('searchpage.no.infosource.selected'),true);
 			return false;
 		}
 		// put the search term into the movieData object
 		movieData.movies.push($('.movie-title').val());
 		if (movieData.movies.length === 0) {
-			window.alert('Please fill the search term');
+			$().message(this.$msg.data('searchpage.movie.required'),true);
 			return false;
 		}
             
-            var request = new $.atmosphere.AtmosphereRequest();
-            request.transport = "websocket";
-            request.url = 'http://localhost:8080/srcMoviesAtm';
-            request.contentType = "application/json";
-            request.data = JSON.stringify(movieData),
-            request.fallbackTransport = "long-polling";
-            request.method = "POST";
-            request.dataType = "text";
-            //request.callback = buildTemplate;
-            
-            request.onMessage = function(response){
-            	
-                buildTemplate(response);
-            };
+        request = new $.atmosphere.AtmosphereRequest();
+        request.transport = "websocket";
+        request.url = 'http://localhost:8080/srcMoviesAtm';
+        request.contentType = "application/json";
+        request.data = JSON.stringify(movieData),
+        request.fallbackTransport = "long-polling";
+        request.method = "POST";
+        request.dataType = "text";
+        //request.callback = buildTemplate;
+        
+        request.onMessage = function(response){
+            buildTemplate(response);
+        };
 
-            request.onMessagePublished = function(response){
+        request.onMessagePublished = function(response){
 
-            };
+        };
 
-            request.onOpen = function() { $.atmosphere.log('info', ['socket open']); };
-            request.onError =  function() { alert("error");$.atmosphere.log('info', ['socket error']); };
-            request.onReconnect =  function() { $.atmosphere.log('info', ['socket reconnect']); };
+        request.onOpen = function() { $.atmosphere.log('info', ['socket open']); };
+        request.onError =  function() { $().message(that.$msg.data('searchpage.server.error'),true);$.atmosphere.log('info', ['socket error']); };
+        request.onReconnect =  function() { $.atmosphere.log('info', ['socket reconnect']); };
 
-            var subSocket = socket.subscribe(request);
+        var subSocket = socket.subscribe(request);
             
             function buildTemplate(response){
             	

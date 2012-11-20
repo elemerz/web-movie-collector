@@ -1,0 +1,21 @@
+#searchPage h2 {
+	font-size:140%;
+	font-weight: bold;
+}
+#searchPage .inputs .user-input {
+	float:left;
+	height: 90%;
+	width:75%;
+}
+#searchPage .inputs button.user-input {
+	float:right;
+	height: 100%;
+	width:24.5%;
+}
+#searchPage .inputs .movie-title {
+	border:1px solid #bbb;
+	font-size:150%;
+}
+#searchPage .info-sources li{
+	float:left;
+}
