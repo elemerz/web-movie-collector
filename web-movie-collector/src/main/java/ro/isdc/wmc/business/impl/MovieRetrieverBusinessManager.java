@@ -12,6 +12,7 @@ import ro.isdc.wmc.business.IMovieRetrieverBusinessManager;
 import ro.isdc.wmc.business.MovieRetriever;
 import ro.isdc.wmc.init.InfoSourceConfig;
 import ro.isdc.wmc.model.SearchInputModel;
+import ro.isdc.wmc.model.WebsitesXPATHMapper;
 import ro.isdc.wmc.utils.Utils;
 
 @Component("movieRetrieverBM")
@@ -23,13 +24,13 @@ public class MovieRetrieverBusinessManager implements
 
 	@Override
 	public void getBriefMoviesResult(AtmosphereResource atmosphereResource,
-			SearchInputModel reqSearch) throws IOReactorException,
+			SearchInputModel reqSearch,  WebsitesXPATHMapper  websitesXPATHMapper) throws IOReactorException,
 			InterruptedException {
 		final List<HttpUriRequest> requests = Utils.getURLs(getConfigApp()
 				.getSiteConfig(), reqSearch);
 
 		MovieRetriever retriever = new MovieRetriever(requests);
-		retriever.execute(requests, atmosphereResource);
+		retriever.execute(requests, atmosphereResource, websitesXPATHMapper);
 
 	}
 

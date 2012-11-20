@@ -1,14 +1,9 @@
 package ro.isdc.wmc.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.Broadcaster;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -25,14 +20,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import ro.isdc.wmc.business.IMovieRetrieverBusinessManager;
-import ro.isdc.wmc.business.MovieRetriever;
 import ro.isdc.wmc.controller.util.AtmosphereUtil;
 import ro.isdc.wmc.init.InfoSourceConfig;
-import ro.isdc.wmc.model.BasicMoviesResult;
-import ro.isdc.wmc.model.MovieURLMapper;
 import ro.isdc.wmc.model.SearchInputModel;
-import ro.isdc.wmc.model.SimpleMovie;
-import ro.isdc.wmc.utils.Utils;
+import ro.isdc.wmc.model.WebsitesXPATHMapper;
 
 
 /**
@@ -43,6 +34,9 @@ public class WMCController {
 	
 	@Autowired
 	private InfoSourceConfig infoSourceConfig;
+	
+	@Autowired
+	WebsitesXPATHMapper websitesXPATHMapper;	
 	
 	@Autowired
 	@Qualifier("movieRetrieverBM")
@@ -92,7 +86,7 @@ public class WMCController {
 		}
 		
 		try {
-			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch);
+			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch,  websitesXPATHMapper);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
