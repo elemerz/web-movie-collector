@@ -38,7 +38,7 @@
 			searchItemTmpl = $('#searchItemTmpl').val();
 
 		// map all the checked checkboxes' values into an array
-		movieData.sites = $('input:checkbox:checked.sources').map(function() {
+		movieData.sites = $('#infoSources :checked').map(function() {
 			return this.value;
 		}).get();
 		if (movieData.sites.length === 0) {
@@ -46,7 +46,7 @@
 			return false;
 		}
 		// put the search term into the movieData object
-		movieData.movies.push($('.search-bar').val());
+		movieData.movies.push($('.movie-title').val());
 		if (movieData.movies.length === 0) {
 			window.alert('Please fill the search term');
 			return false;
@@ -54,10 +54,12 @@
             
             var request = new $.atmosphere.AtmosphereRequest();
             request.transport = "websocket";
-            request.url = 'http://172.17.12.178:8080/srcMoviesAtm';
+            request.url = 'http://localhost:8080/srcMoviesAtm';
             request.contentType = "application/json";
             request.data = JSON.stringify(movieData),
-            request.fallbackTransport = null;
+            request.fallbackTransport = "long-polling";
+            request.method = "POST";
+            request.dataType = "text";
             //request.callback = buildTemplate;
             
             request.onMessage = function(response){
@@ -83,13 +85,12 @@
                 
                 if(response.state = "messageReceived"){
                 
-                	console.dir($.parseJSON(response.responseBody.basicMoviesArray));
+                	var tooltipData = JSON.stringify($.parseJSON(response.responseBody).basicMoviesArray);
 					$(searchItemTmpl.tmpl({
-						"label" : movieTitle,
-						"searchResult": response.basicMoviesArray
-					})).tooltip().appendTo(contentArea).find('.search-term').click($.proxy(this.removeSearchItem, this));
+						"label" : movieTitle
+					})).appendTo(contentArea).children().attr('data-tooltipmsg', tooltipData).tooltip();
 
-					that.briefMovieInfo = response.basicMoviesArray;
+					that.briefMovieInfo = response.responseBody.basicMoviesArray;
             	}
             }
         },

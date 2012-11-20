@@ -19,7 +19,7 @@
 				htmlTmpl : "<div class='tooltip hidden {id}' id='{id}'><div class='tooltip-content'>{head}<div class='tooltip-body'>{body}</div>{footer}</div></div>",
 				title : '',					
 				msg : null,
-				footer: '',
+				footer: ''
 			},
 			configs = $.extend({}, def, cfg),
 			template = function(string, obj) {
@@ -135,6 +135,7 @@
 							 				};
 							 
 							 var tooltipMap = {};
+							 var briefMovieInfo = $trigger.data('tooltipmsg');
 							 for (var item in briefMovieInfo) {
 								 var site = briefMovieInfo[item].site;							 
 								 if(!(site in tooltipMap)) {

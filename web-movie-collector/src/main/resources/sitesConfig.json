@@ -1,0 +1,27 @@
+{
+  "configMap": {
+  "imdb":{
+    "briefSearchURL":"http://www.imdb.com/search/title?title={title}/",
+    "fullSearchURL":"http://www.imdb.com/search/title?title={title}/",
+    "briefSearchMethod":"get",
+    "fullSearchMethod": "get",
+    "briefPostData":{},
+    "fullPostData":{},
+    "filmSheetPageIdentifier":"<CSS3 selector|XPathSelector|Substring>",
+    "filmListPageIdentifier":"<CSS3 selector|XPathSelector|Substring>"
+  },
+ "filmkatalogus": {
+    "briefSearchURL":"http://www.filmkatalogus.hu/kereses",
+    "fullSearchURL":"http://www.filmkatalogus.hu/kereses",
+    "briefSearchMethod": "post",
+    "fullSearchMethod": "get",
+    "briefPostData": {
+       "gyorskeres":"0",
+       "keres0":"1",
+       "sbmt":"Keress!",
+       "szo0":"{title}"
+    },
+    "fullPostData":{}
+  }
+  }
+}
