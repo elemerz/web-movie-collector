@@ -1,4 +1,4 @@
-alert(10);
+
 (function($, NS, SuperClass, SubClass) {
 	window[NS][SubClass] = window[NS][SubClass] || window[NS][SuperClass].extend({
 		$ctx: $('#searchPage'),
