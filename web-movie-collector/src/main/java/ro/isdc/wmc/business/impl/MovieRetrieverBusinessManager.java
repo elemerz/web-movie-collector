@@ -21,7 +21,8 @@ public class MovieRetrieverBusinessManager implements
 
 	@Autowired
 	private InfoSourceConfig configApp;
-
+	@Autowired
+	private MovieRetriever retriever;
 	@Override
 	public void getBriefMoviesResult(AtmosphereResource atmosphereResource,
 			SearchInputModel reqSearch,  WebsitesXPATHMapper  websitesXPATHMapper) throws IOReactorException,
@@ -29,7 +30,6 @@ public class MovieRetrieverBusinessManager implements
 		final List<HttpUriRequest> requests = Utils.getURLs(getConfigApp()
 				.getSiteConfig(), reqSearch);
 
-		MovieRetriever retriever = new MovieRetriever(requests);
 		retriever.execute(requests, atmosphereResource, websitesXPATHMapper);
 
 	}
