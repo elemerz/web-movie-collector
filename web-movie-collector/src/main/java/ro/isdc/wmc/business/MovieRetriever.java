@@ -15,6 +15,7 @@ import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.atmosphere.cpr.AtmosphereResource;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import ro.isdc.wmc.model.SimpleMovie;
@@ -31,7 +32,7 @@ public class MovieRetriever  {
 		
 	}
 
-	public void execute(List<HttpUriRequest> requests, AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
+	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
 		
 		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
 		initParams(httpclient);
@@ -61,9 +62,11 @@ public class MovieRetriever  {
 							}
 							 
 							//TODO: Broadcast the response to client by using the atmoResource broadcaster
-							 
-						/*	 atmoResource.getBroadcaster().broadcast(arg0);
-							 resultOBJ.setBasicMoviesArray(movies); 		*/					
+							 final ObjectMapper mapper = new ObjectMapper();
+							 String moviesAsJson = mapper.writeValueAsString(movies);
+							 System.out.println(moviesAsJson);
+							 //atmoResource.getBroadcaster().broadcast(moviesAsJson);
+							 //resultOBJ.setBasicMoviesArray(movies); 						
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
