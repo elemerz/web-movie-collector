@@ -55,7 +55,7 @@ public class MovieRetrieverBusinessManager implements
 	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
 			MovieTO detailsRequestModel, WebsitesXPATHMapper  websitesXPATHMapper) throws IOReactorException,
 			InterruptedException  {
-		final HttpUriRequest request = Utils.getMovieDetailsURLs(getConfigApp().getSiteConfig(), detailsRequestModel);
+		final HttpUriRequest request = Utils.getMovieDetailsURL(getConfigApp().getSiteConfig(), detailsRequestModel);
 		
 		retriever.execute(request,atmosphereResource, websitesXPATHMapper);
 		
