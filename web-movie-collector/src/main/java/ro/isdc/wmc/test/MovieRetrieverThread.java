@@ -2,7 +2,7 @@ package ro.isdc.wmc.test;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.atmosphere.cpr.AtmosphereResource;
+import org.apache.http.nio.reactor.IOReactorException;
 
 import ro.isdc.wmc.business.MovieRetriever;
 
@@ -18,6 +18,9 @@ public class MovieRetrieverThread extends Thread {
 		try {
 			mr.execute(req);
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOReactorException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
