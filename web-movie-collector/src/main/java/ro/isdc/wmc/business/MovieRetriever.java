@@ -15,6 +15,7 @@ import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.atmosphere.cpr.AtmosphereResource;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import ro.isdc.wmc.model.SimpleMovie;
@@ -25,18 +26,18 @@ import ro.isdc.wmc.parser.impl.SourceParserImpl;
 public class MovieRetriever  {
 
 	private final HttpHost proxy;
-	private HttpAsyncClient httpclient;
 	
-	public MovieRetriever() throws IOReactorException {
+	public MovieRetriever() {
 		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
 		
 	}
 
-	public void execute(List<HttpUriRequest> requests, AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
+	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
 		
-		this.httpclient = new DefaultHttpAsyncClient();
-		this.httpclient.start();
-		initParams();
+		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
+		initParams(httpclient);
+		httpclient.start();
+		
 		final CountDownLatch latch =  new CountDownLatch(requests.size());
 		try {
 
@@ -61,9 +62,11 @@ public class MovieRetriever  {
 							}
 							 
 							//TODO: Broadcast the response to client by using the atmoResource broadcaster
-							 
-						/*	 atmoResource.getBroadcaster().broadcast(arg0);
-							 resultOBJ.setBasicMoviesArray(movies); 		*/					
+							 final ObjectMapper mapper = new ObjectMapper();
+							 String moviesAsJson = mapper.writeValueAsString(movies);
+							 System.out.println(moviesAsJson);
+							 //atmoResource.getBroadcaster().broadcast(moviesAsJson);
+							 //resultOBJ.setBasicMoviesArray(movies); 						
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -91,7 +94,10 @@ public class MovieRetriever  {
 		System.out.println("Done");
 	}
 	
-	public void execute(final HttpUriRequest request) throws InterruptedException  {
+	public void execute(final HttpUriRequest request) throws InterruptedException, IOReactorException  {
+		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
+		initParams(httpclient);
+		httpclient.start();
 		try{
 			System.out.println("inainte de httpclient: " + Thread.currentThread().getName());
 		httpclient.execute(request, new FutureCallback<HttpResponse>() {
@@ -141,8 +147,8 @@ public class MovieRetriever  {
 
 
 
-	private void initParams() {
-		this.httpclient.getParams()
+	private void initParams(HttpAsyncClient httpclient) {
+		httpclient.getParams()
 		.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 3000)
 		.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000)
 		.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
