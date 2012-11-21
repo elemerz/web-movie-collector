@@ -1,5 +1,6 @@
 package ro.isdc.wmc.business;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -14,6 +15,10 @@ import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.atmosphere.cpr.AtmosphereResource;
+
+import ro.isdc.wmc.model.SimpleMovie;
+import ro.isdc.wmc.model.WebsitesXPATHMapper;
+import ro.isdc.wmc.parser.impl.SourceParserImpl;
 
 public class MovieRetriever  {
 
@@ -33,7 +38,7 @@ public class MovieRetriever  {
 		initParams();
 	}	
 
-	public void execute(List<HttpUriRequest> requests, AtmosphereResource atmoResource) throws InterruptedException  {
+	public void execute(List<HttpUriRequest> requests, AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException  {
 		final CountDownLatch latch =  new CountDownLatch(requests.size());
 		try {
 
@@ -42,17 +47,25 @@ public class MovieRetriever  {
 
 					public void completed(final HttpResponse response) {
 						
-						//TODO: Pass the parser the html with a parameter saying what kind of request it was 
-						// short movie list or verbose or details
-						
-						
-						//TODO: Broadcast the response to client by using the atmoResource broadcaster
 						
 						latch.countDown();
-						System.out.println(request.getRequestLine() + "->" + response.getStatusLine()+
-								" \n Request type -> "+ request.getMethod() );
-						try {
-							System.out.println("Response html from server was: " + EntityUtils.toString(response.getEntity()));
+						//TODO: Pass the parser the html with 
+						try {							
+							 String responseAsString = EntityUtils.toString(response.getEntity());
+							 SourceParserImpl parser = new SourceParserImpl();
+							 String uri = request.getURI().getHost();
+							 uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
+							 
+							 ArrayList<SimpleMovie> movies = (ArrayList<SimpleMovie>) parser.getSimpleMovieListFromSite(responseAsString, uri, websitesXPATHMapper);
+							 
+							 for (SimpleMovie item : movies) {
+								 System.out.println(item.getTitle());
+							}
+							 
+							//TODO: Broadcast the response to client by using the atmoResource broadcaster
+							 
+						/*	 atmoResource.getBroadcaster().broadcast(arg0);
+							 resultOBJ.setBasicMoviesArray(movies); 		*/					
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
