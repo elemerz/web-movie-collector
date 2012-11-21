@@ -13,7 +13,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 
 import ro.isdc.wmc.model.SearchInputModel;
-import ro.isdc.wmc.model.SimpleMovie;
+import ro.isdc.wmc.model.SimpleMovieInfo;
 import ro.isdc.wmc.to.ConfigInfoSrcTO;
 import ro.isdc.wmc.to.MovieTO;
 import ro.isdc.wmc.to.SiteConfigTO;
@@ -87,9 +87,8 @@ public class Utils {
 		return uriList;
 	}
 	
-public static HttpUriRequest getMovieDetailsURL(SiteConfigTO siteConfig, MovieTO detailsRequestModel){
-		
-		
+public static HttpUriRequest getMovieDetailsURL(SiteConfigTO siteConfig, MovieTO detailsRequestModel) {
+				
 		Map<String, ConfigInfoSrcTO> configMap = siteConfig.getConfigMap();
 		HttpUriRequest uri = null;
 		
@@ -123,15 +122,7 @@ public static HttpUriRequest getMovieDetailsURL(SiteConfigTO siteConfig, MovieTO
 				uri = new HttpGet(configSite.getFullSearchURL().replace("{movieId}", detailsRequestModel.getMovieId()));
 			}
 			
-		}
-	
-		return uri;
+		}	
+		return uri;		
 	}
-	
-		
-		
-		
-
-		
-	
 }

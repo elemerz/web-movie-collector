@@ -3,7 +3,7 @@ package ro.isdc.wmc.model;
 /**
 @author Dan Cirja
  */
-public class FullMovie extends SimpleMovie {
+public class MovieInfo extends SimpleMovieInfo {
 
 	private String rate;
 	private String description;
@@ -11,10 +11,10 @@ public class FullMovie extends SimpleMovie {
 	private String genre;
 	private String runtime;
 	
-	public FullMovie() {
+	public MovieInfo() {
 		
 	}
-	public FullMovie(String id, String title, String year, String director, String source, 
+	public MovieInfo(String id, String title, String year, String director, String source, 
 			String rate, String description, String cast, String genre, String runtime) {
 		
 		super(id, title, year, director, source);

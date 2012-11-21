@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import ro.isdc.wmc.business.IMovieRetrieverBusinessManager;
 import ro.isdc.wmc.controller.util.AtmosphereUtil;
 import ro.isdc.wmc.init.InfoSourceConfig;
+import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
-import ro.isdc.wmc.model.WebsitesXPATHMapper;
 
 
 /**
@@ -36,7 +36,7 @@ public class WMCController {
 	private InfoSourceConfig infoSourceConfig;
 	
 	@Autowired
-	WebsitesXPATHMapper websitesXPATHMapper;	
+	HtmlNodePathMapper htmlNodePathMapper;	
 	
 	@Autowired
 	@Qualifier("movieRetrieverBM")
@@ -86,7 +86,7 @@ public class WMCController {
 		}
 		
 		try {
-			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch,  websitesXPATHMapper);
+			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch,  htmlNodePathMapper);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

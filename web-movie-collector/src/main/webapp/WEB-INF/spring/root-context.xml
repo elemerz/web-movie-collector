@@ -18,8 +18,8 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
 		</property>
 	</bean>
 	
-	<bean id="websitesXPATHMapper" class="ro.isdc.wmc.model.WebsitesXPATHMapper">
-	  <property name="xpathMap">
+	<bean id="htmlNodePathMapper" class="ro.isdc.wmc.model.HtmlNodePathMapper">
+	  <property name="nodePathMap">
 	   <bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 	    <property name="location" value="xpath.properties"/>
 	   </bean>

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import ro.isdc.wmc.business.IMovieRetrieverBusinessManager;
 import ro.isdc.wmc.business.MovieRetriever;
 import ro.isdc.wmc.init.InfoSourceConfig;
+import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
-import ro.isdc.wmc.model.WebsitesXPATHMapper;
 import ro.isdc.wmc.to.MovieTO;
 import ro.isdc.wmc.utils.Utils;
 
@@ -26,12 +26,12 @@ public class MovieRetrieverBusinessManager implements
 	private MovieRetriever retriever;
 	@Override
 	public void getBriefMoviesResult(AtmosphereResource atmosphereResource,
-			SearchInputModel reqSearch,  WebsitesXPATHMapper  websitesXPATHMapper) throws IOReactorException,
+			SearchInputModel reqSearch,  HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
 			InterruptedException {
 		final List<HttpUriRequest> requests = Utils.getURLs(getConfigApp()
 				.getSiteConfig(), reqSearch);
 
-		retriever.execute(requests, atmosphereResource, websitesXPATHMapper);
+		retriever.execute(requests, atmosphereResource, htmlNodePathMapper);
 
 	}
 

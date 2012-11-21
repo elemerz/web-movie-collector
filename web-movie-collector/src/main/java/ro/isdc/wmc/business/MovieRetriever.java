@@ -18,8 +18,8 @@ import org.atmosphere.cpr.AtmosphereResource;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.stereotype.Component;
 
-import ro.isdc.wmc.model.SimpleMovie;
-import ro.isdc.wmc.model.WebsitesXPATHMapper;
+import ro.isdc.wmc.model.HtmlNodePathMapper;
+import ro.isdc.wmc.model.SimpleMovieInfo;
 import ro.isdc.wmc.parser.impl.SourceParserImpl;
 
 @Component
@@ -32,7 +32,7 @@ public class MovieRetriever  {
 		
 	}
 
-	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
+	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final HtmlNodePathMapper  htmlNodePathMapper) throws InterruptedException, IOReactorException  {
 		
 		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
 		initParams(httpclient);
@@ -55,11 +55,10 @@ public class MovieRetriever  {
 							 String uri = request.getURI().getHost();
 							 uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
 							 
+							 ArrayList<SimpleMovieInfo> movies = (ArrayList<SimpleMovieInfo>) parser.getMoviesByTitle(responseAsString, uri, htmlNodePathMapper);
 							 
-							 //TODO: Change the way I feed the HTML string to the parser
-							 ArrayList<SimpleMovie> movies = (ArrayList<SimpleMovie>) parser.getSimpleMovieListFromSite(responseAsString, uri, websitesXPATHMapper);
-							 
-							 for (SimpleMovie item : movies) {  
+							 for (SimpleMovieInfo item : movies) {
+								 System.out.println("Title");
 								 System.out.println(item.getTitle());
 							}
 							 
@@ -150,6 +149,4 @@ public class MovieRetriever  {
 		.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true).setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		
 	}
-
-
 }

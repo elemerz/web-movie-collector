@@ -4,7 +4,7 @@ package ro.isdc.wmc.model;
 @author Dan Cirja
 */
 
-public class SimpleMovie {
+public class SimpleMovieInfo {
 
 	private String id;
 	private String title;
@@ -13,10 +13,10 @@ public class SimpleMovie {
 	private String site;
 	
 
-	public SimpleMovie() {
+	public SimpleMovieInfo() {
 		
 	}
-	public SimpleMovie(String id, String title, String year, String director, String site) {
+	public SimpleMovieInfo(String id, String title, String year, String director, String site) {
 		this.id = id;
 		this.title = title;
 		this.year = year;
