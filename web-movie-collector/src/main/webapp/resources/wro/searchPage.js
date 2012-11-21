@@ -331,13 +331,13 @@
 				return this.value;
 			}).get();
 			if (movieData.sites.length === 0) {
-				window.alert('Please select a website to search on...');
+				$().message(that.$msg.data('searchpage.no.infosource.selected'),true);
 				return false;
 			}
 			// put the search term into the movieData object
 			movieData.movies.push($('.search-bar').val());
 			if (movieData.movies.length === 0) {
-				window.alert('Please fill the search term');
+				$().message(that.$msg.data('searchpage.movie.required'),true);
 				return false;
 			}
 			// stringify the movieData object
@@ -351,7 +351,7 @@
 				contentType : 'application/json; charset=utf-8',
 				dataType : 'json',
 				success : function(response) {
-					window.alert('success' + response.basicMoviesArray);
+					console.log('success' ,response.basicMoviesArray);
 					$(searchItemTmpl.tmpl({
 						"label" : movieTitle,
 						"searchResult": response.basicMoviesArray
@@ -360,7 +360,7 @@
 					that.briefMovieInfo = response.basicMoviesArray;
 				},
 				error : function(err, req, stat) {
-					window.alert(req + 'stat:' + stat);
+					$().message(req + 'stat:' + stat,true);
 				}
 			});
 		},
@@ -384,7 +384,6 @@
 				dataType : 'json',
 				success : function(response) {
 					if (response.length > 0) {
-						window.alert(response);
 						for ( var i = 0; i < response.length; i++) {
 							dataObject.id = response[i].id;
 							dataObject.title = response[i].title;
@@ -396,7 +395,7 @@
 					}
 				},
 				error : function(err, req, stat) {
-					window.alert(err);
+					$().message(err);
 				}
 			});
 
@@ -417,7 +416,6 @@
 				dataType : 'json',
 				success : function(response) {
 					if (response.length > 0) {
-						window.alert(response);
 						for ( var i = 0; i < response.length; i++) {
 							dataObject.id = response[i].id;
 							dataObject.title = response[i].title;
@@ -433,7 +431,7 @@
 					}
 				},
 				error : function(err, req, stat) {
-					window.alert(err);
+					$().message(err);
 				}
 			});
 			return dataObject;

@@ -135,7 +135,10 @@
 
 .jquery-message a {
     display: none;
-}#searchPage h2 {
+}.jquery-error {
+	background-color: #993322 !important;
+}
+#searchPage h2 {
 	font-size:140%;
 	font-weight: bold;
 }

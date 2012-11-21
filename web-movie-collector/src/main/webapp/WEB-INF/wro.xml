@@ -24,6 +24,7 @@
   <group name="searchPage">
     <css>/resources/jquery/tooltip/css/tooltip.customized-0.1.css</css>
     <css>/resources/jquery/message/css/jquery.message-1.0.css</css>
+    <css>/resources/jquery/message/css/jquery.message-1.0.customizations.css</css>
     <css>/resources/searchPage/css/searchPage.css</css>
     <js>/resources/jquery/tooltip/js/tooltip.customized-0.1.js</js>
     <js>/resources/jquery/message/js/jquery.message-1.0.min.js</js>

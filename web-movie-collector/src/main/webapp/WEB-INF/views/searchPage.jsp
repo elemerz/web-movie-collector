@@ -13,7 +13,7 @@
  </ul>
 	<ul class="info-sources ui-layout-south ui-helper-clearfix">
 		<c:forEach var="infoSource" items="${infoSources}">
-			<li class="info-source"><input type="checkbox" value="${infoSource}" /><label for="source1">${infoSource}</label></li>
+			<li class="info-source"><input type="checkbox" id="${infoSource}" value="${infoSource}" /><label for="${infoSource}">${infoSource}</label></li>
 		</c:forEach>
 	</ul>
  <aside class="ui-layout-east">Movie Details Zone</aside>	
