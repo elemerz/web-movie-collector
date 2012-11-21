@@ -15,42 +15,28 @@ import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.atmosphere.cpr.AtmosphereResource;
+import org.springframework.stereotype.Component;
 
 import ro.isdc.wmc.model.SimpleMovie;
 import ro.isdc.wmc.model.WebsitesXPATHMapper;
 import ro.isdc.wmc.parser.impl.SourceParserImpl;
 
+@Component
 public class MovieRetriever  {
 
 	private final HttpHost proxy;
 	private HttpAsyncClient httpclient;
 	
-	public MovieRetriever() {
+	public MovieRetriever() throws IOReactorException {
 		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
-		try {
-			this.httpclient = new DefaultHttpAsyncClient();
-		} catch (IOReactorException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		initParams();
-		
-	}
-	
-	public MovieRetriever(List<HttpUriRequest> requests) throws IOReactorException {
-		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
-		this.httpclient = new DefaultHttpAsyncClient();
-		initParams();
 		
 	}
 
-	public  MovieRetriever(List<HttpUriRequest> requests , AtmosphereResource atmoResource ) throws IOReactorException {
-		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
+	public void execute(List<HttpUriRequest> requests, AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
+		
 		this.httpclient = new DefaultHttpAsyncClient();
+		this.httpclient.start();
 		initParams();
-	}	
-
-	public void execute(List<HttpUriRequest> requests, AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException  {
 		final CountDownLatch latch =  new CountDownLatch(requests.size());
 		try {
 
@@ -161,7 +147,7 @@ public class MovieRetriever  {
 		.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000)
 		.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
 		.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true).setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-		this.httpclient.start();
+		
 	}
 
 
