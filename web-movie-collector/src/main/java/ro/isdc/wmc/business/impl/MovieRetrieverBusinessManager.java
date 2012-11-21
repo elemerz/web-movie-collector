@@ -53,11 +53,11 @@ public class MovieRetrieverBusinessManager implements
 
 	@Override
 	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
-			MovieTO detailsRequestModel, WebsitesXPATHMapper  websitesXPATHMapper) throws IOReactorException,
+			MovieTO detailsRequestModel, HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
 			InterruptedException  {
 		final HttpUriRequest request = Utils.getMovieDetailsURL(getConfigApp().getSiteConfig(), detailsRequestModel);
 		
-		retriever.execute(request,atmosphereResource, websitesXPATHMapper);
+		retriever.execute(request,atmosphereResource, htmlNodePathMapper);
 		
 	}
 

@@ -48,7 +48,6 @@ public class MovieRetriever  {
 						
 						
 						latch.countDown();
-						//TODO: Pass the parser the html with 
 						try {							
 							 String responseAsString = EntityUtils.toString(response.getEntity());
 							 SourceParserImpl parser = new SourceParserImpl();
@@ -96,7 +95,7 @@ public class MovieRetriever  {
 		System.out.println("Done");
 	}
 	
-	public void execute(final HttpUriRequest request, final AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
+	public void execute(final HttpUriRequest request, final AtmosphereResource atmoResource,   final HtmlNodePathMapper  htmlNodePathMapper) throws InterruptedException, IOReactorException  {
 		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
 		initParams(httpclient);
 		httpclient.start();

@@ -38,7 +38,7 @@ public interface IMovieRetrieverBusinessManager {
 	void getFullMoviesResult(AtmosphereResource atmosphereResource, MovieTO detailsRequest);
 
 	void getFullMoviesResult(AtmosphereResource atmosphereResource,
-			MovieTO detailsRequestModel, WebsitesXPATHMapper websitesXPATHMapper)
+			MovieTO detailsRequestModel, HtmlNodePathMapper htmlNodePathMapper)
 			throws IOReactorException, InterruptedException;
 }
 
