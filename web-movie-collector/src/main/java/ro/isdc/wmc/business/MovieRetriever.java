@@ -57,7 +57,7 @@ public class MovieRetriever  {
 							 
 							 ArrayList<SimpleMovie> movies = (ArrayList<SimpleMovie>) parser.getSimpleMovieListFromSite(responseAsString, uri, websitesXPATHMapper);
 							 
-							 for (SimpleMovie item : movies) {
+							 for (SimpleMovie item : movies) {  
 								 System.out.println(item.getTitle());
 							}
 							 
