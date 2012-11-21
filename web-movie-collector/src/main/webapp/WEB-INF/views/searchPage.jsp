@@ -7,7 +7,7 @@
 </header>
 <section class="ui-layout-center layout-inner">
  <header class="ui-layout-north user-input-zone">
- 	<label for="movieTitle" class="ui-layout-west">Movie Title</label>
+ 	<label for="movieTitle" class="ui-layout-west"><spring:message code="searchPage.movie.title"/></label>
  	<div class="ui-layout-center inputs ui-helper-clearfix">
 	 	<input  class="user-input movie-title" placeholder="<spring:message code="searchPage.movie.title.placeholder"/>"/>
 	 	<button class="user-input add"><spring:message code="searchPage.button.add"/></button>
