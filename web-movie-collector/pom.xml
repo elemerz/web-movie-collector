@@ -187,7 +187,8 @@
 		   <groupId>net.sourceforge.htmlcleaner</groupId>
 		   <artifactId>htmlcleaner</artifactId>
 		   <version>2.2</version>
-		</dependency>		
+		</dependency>	
+		
 	</dependencies>
 	<build>
 		<plugins>

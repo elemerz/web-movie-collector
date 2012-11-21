@@ -199,7 +199,8 @@
 	$('.tooltip-aware').tooltip();
 	
 }(jQuery));
-(function(e){function s(n){t||(t=e(e.message.defaults.template).appendTo(document.body),e(window).bind("mousemove click keypress",o)),t[n?"addClass":"removeClass"]("jquery-error")}function o(){t.is(":visible")&&!t.is(":animated")&&!n&&t.animate({opacity:0},e.message.defaults.fadeOutDuration,function(){e(this).hide()})}var t,n,r,i;e.fn.message=function(u,a){u=e.trim(u||this.text());if(!u)return;clearTimeout(r),clearTimeout(i),s(a),t.find("p").html(u),t.show().animate({opacity:e.message.defaults.opacity},e.message.defaults.fadeInDuration),n=!0,active=!1,r=setTimeout(function(){n=!1},e.message.defaults.minDuration+e.message.defaults.displayDurationPerCharacter*Math.sqrt(u.length)),i=setTimeout(o,e.message.defaults.totalTimeout)},e.message={},e.message.defaults={opacity:.8,fadeOutDuration:500,fadeInDuration:200,displayDurationPerCharacter:125,minDuration:2500,totalTimeout:6e3,template:'<div class="jquery-message"><div class="round"></div><p></p><div class="round"></div></div>'}})(jQuery);(function($, NS, SuperClass, SubClass) {
+(function(e){function s(n){t||(t=e(e.message.defaults.template).appendTo(document.body),e(window).bind("mousemove click keypress",o)),t[n?"addClass":"removeClass"]("jquery-error")}function o(){t.is(":visible")&&!t.is(":animated")&&!n&&t.animate({opacity:0},e.message.defaults.fadeOutDuration,function(){e(this).hide()})}var t,n,r,i;e.fn.message=function(u,a){u=e.trim(u||this.text());if(!u)return;clearTimeout(r),clearTimeout(i),s(a),t.find("p").html(u),t.show().animate({opacity:e.message.defaults.opacity},e.message.defaults.fadeInDuration),n=!0,active=!1,r=setTimeout(function(){n=!1},e.message.defaults.minDuration+e.message.defaults.displayDurationPerCharacter*Math.sqrt(u.length)),i=setTimeout(o,e.message.defaults.totalTimeout)},e.message={},e.message.defaults={opacity:.8,fadeOutDuration:500,fadeInDuration:200,displayDurationPerCharacter:125,minDuration:2500,totalTimeout:6e3,template:'<div class="jquery-message"><div class="round"></div><p></p><div class="round"></div></div>'}})(jQuery);alert(10);
+(function($, NS, SuperClass, SubClass) {
 	window[NS][SubClass] = window[NS][SubClass] || window[NS][SuperClass].extend({
 		$ctx: $('#searchPage'),
 		$msg: $('#searchPage .messages'),
@@ -275,7 +276,7 @@
             
         request = new $.atmosphere.AtmosphereRequest();
         request.transport = "websocket";
-        request.url = 'http://localhost:8080/srcMoviesAtm';
+        request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
         request.contentType = "application/json";
         request.data = JSON.stringify(movieData),
         request.fallbackTransport = "long-polling";
