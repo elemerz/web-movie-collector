@@ -1,6 +1,7 @@
-package ro.isdc.wmc.test;
+package ro.isdc.wmc.business;
 
-public class MyMain {
+
+public class TestMovieRetriever {
 
 	public static void main(String [] args){
 		Thread t1 = new MovieRetrieverThread();

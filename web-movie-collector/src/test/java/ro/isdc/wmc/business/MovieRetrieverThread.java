@@ -1,4 +1,4 @@
-package ro.isdc.wmc.test;
+package ro.isdc.wmc.business;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
