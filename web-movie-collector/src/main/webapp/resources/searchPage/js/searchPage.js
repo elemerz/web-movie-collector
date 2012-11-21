@@ -1,3 +1,4 @@
+
 (function($, NS, SuperClass, SubClass) {
 	window[NS][SubClass] = window[NS][SubClass] || window[NS][SuperClass].extend({
 		$ctx: $('#searchPage'),
@@ -74,7 +75,7 @@
             
         request = new $.atmosphere.AtmosphereRequest();
         request.transport = "websocket";
-        request.url = 'http://localhost:8080/srcMoviesAtm';
+        request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
         request.contentType = "application/json";
         request.data = JSON.stringify(movieData),
         request.fallbackTransport = "long-polling";
