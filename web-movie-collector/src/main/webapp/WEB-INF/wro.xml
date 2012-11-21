@@ -26,6 +26,7 @@
     <css>/resources/jquery/message/css/jquery.message-1.0.css</css>
     <css>/resources/jquery/message/css/jquery.message-1.0.customizations.css</css>
     <css>/resources/searchPage/css/searchPage.css</css>
+    <css>/resources/localeChanger/css/localeChanger.css</css>
     <js>/resources/jquery/tooltip/js/tooltip.customized-0.1.js</js>
     <js>/resources/jquery/message/js/jquery.message-1.0.min.js</js>
     <js>/resources/searchPage/js/searchPage.js</js>
