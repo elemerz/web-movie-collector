@@ -5,6 +5,7 @@ import org.atmosphere.cpr.AtmosphereResource;
 
 import ro.isdc.wmc.model.SearchInputModel;
 import ro.isdc.wmc.model.WebsitesXPATHMapper;
+import ro.isdc.wmc.to.MovieTO;
 
 /**
  * Interface defining the contract for 
@@ -29,11 +30,15 @@ public interface IMovieRetrieverBusinessManager {
 
 	/**
 	 * Method for retrieving full information about one movie.
-	 * @param atmosphereResource
+	 * @param atmosphereResource 
 	 * 			the Atmosphere resource to which to broadcast result
 	 * @param movieID
 	 * 			the movie id for which to get details
 	 */
-	void getFullMoviesResult(AtmosphereResource atmosphereResource, String movieID);
+	void getFullMoviesResult(AtmosphereResource atmosphereResource, MovieTO detailsRequest);
+
+	void getFullMoviesResult(AtmosphereResource atmosphereResource,
+			MovieTO detailsRequestModel, WebsitesXPATHMapper websitesXPATHMapper)
+			throws IOReactorException, InterruptedException;
 }
 

@@ -55,18 +55,21 @@ public class MovieRetriever  {
 							 String uri = request.getURI().getHost();
 							 uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
 							 
+							 
+							 //TODO: Change the way I feed the HTML string to the parser
 							 ArrayList<SimpleMovie> movies = (ArrayList<SimpleMovie>) parser.getSimpleMovieListFromSite(responseAsString, uri, websitesXPATHMapper);
 							 
 							 for (SimpleMovie item : movies) {  
 								 System.out.println(item.getTitle());
 							}
 							 
-							//TODO: Broadcast the response to client by using the atmoResource broadcaster
 							 final ObjectMapper mapper = new ObjectMapper();
 							 String moviesAsJson = mapper.writeValueAsString(movies);
+							 
 							 System.out.println(moviesAsJson);
-							 //atmoResource.getBroadcaster().broadcast(moviesAsJson);
-							 //resultOBJ.setBasicMoviesArray(movies); 						
+							 
+							
+							 atmoResource.getBroadcaster().broadcast(moviesAsJson);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -94,7 +97,7 @@ public class MovieRetriever  {
 		System.out.println("Done");
 	}
 	
-	public void execute(final HttpUriRequest request) throws InterruptedException, IOReactorException  {
+	public void execute(final HttpUriRequest request, final AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
 		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
 		initParams(httpclient);
 		httpclient.start();
@@ -105,25 +108,17 @@ public class MovieRetriever  {
 			public void completed(final HttpResponse response) {
 				
 				
-				//TODO: Pass the parser the html with 
 				try {							
 					 String responseAsString = EntityUtils.toString(response.getEntity());
 					 SourceParserImpl parser = new SourceParserImpl();
+					 
 					 String uri = request.getURI().getHost();
 					 uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
 					 
-					 //ArrayList<SimpleMovie> movies = (ArrayList<SimpleMovie>) parser.getSimpleMovieListFromSite(responseAsString, uri, websitesXPATHMapper);
-					 
-					/* for (SimpleMovie item : movies) {
-						 System.out.println(item.getTitle());
-					}*/
-					 
-					//TODO: Broadcast the response to client by using the atmoResource broadcaster
-					 
-				/*	 atmoResource.getBroadcaster().broadcast(arg0);
-					 resultOBJ.setBasicMoviesArray(movies); 		*/					
+					 //TODO: Feed the full movie details HTML to the parser
+					 // TODO: Send the response to the client
+								
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

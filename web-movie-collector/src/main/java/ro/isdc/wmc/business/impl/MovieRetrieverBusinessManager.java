@@ -13,6 +13,7 @@ import ro.isdc.wmc.business.MovieRetriever;
 import ro.isdc.wmc.init.InfoSourceConfig;
 import ro.isdc.wmc.model.SearchInputModel;
 import ro.isdc.wmc.model.WebsitesXPATHMapper;
+import ro.isdc.wmc.to.MovieTO;
 import ro.isdc.wmc.utils.Utils;
 
 @Component("movieRetrieverBM")
@@ -34,12 +35,6 @@ public class MovieRetrieverBusinessManager implements
 
 	}
 
-	@Override
-	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
-			String movieID) {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	/**
 	 * @return the configApp
@@ -54,6 +49,24 @@ public class MovieRetrieverBusinessManager implements
 	 */
 	public void setConfigApp(InfoSourceConfig configApp) {
 		this.configApp = configApp;
+	}
+
+	@Override
+	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
+			MovieTO detailsRequestModel, WebsitesXPATHMapper  websitesXPATHMapper) throws IOReactorException,
+			InterruptedException  {
+		final HttpUriRequest request = Utils.getMovieDetailsURLs(getConfigApp().getSiteConfig(), detailsRequestModel);
+		
+		retriever.execute(request,atmosphereResource, websitesXPATHMapper);
+		
+	}
+
+
+	@Override
+	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
+			MovieTO detailsRequest) {
+		// TODO Auto-generated method stub
+		
 	}
 
 
