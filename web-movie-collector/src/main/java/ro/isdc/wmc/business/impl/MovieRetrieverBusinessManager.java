@@ -11,8 +11,9 @@ import org.springframework.stereotype.Component;
 import ro.isdc.wmc.business.IMovieRetrieverBusinessManager;
 import ro.isdc.wmc.business.MovieRetriever;
 import ro.isdc.wmc.init.InfoSourceConfig;
+import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
-import ro.isdc.wmc.model.WebsitesXPATHMapper;
+import ro.isdc.wmc.to.MovieTO;
 import ro.isdc.wmc.utils.Utils;
 
 @Component("movieRetrieverBM")
@@ -21,23 +22,26 @@ public class MovieRetrieverBusinessManager implements
 
 	@Autowired
 	private InfoSourceConfig configApp;
-
+	@Autowired
+	private MovieRetriever retriever;
 	@Override
 	public void getBriefMoviesResult(AtmosphereResource atmosphereResource,
-			SearchInputModel reqSearch,  WebsitesXPATHMapper  websitesXPATHMapper) throws IOReactorException,
+			SearchInputModel reqSearch,  HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
 			InterruptedException {
 		final List<HttpUriRequest> requests = Utils.getURLs(getConfigApp()
 				.getSiteConfig(), reqSearch);
 
-		MovieRetriever retriever = new MovieRetriever(requests);
-		retriever.execute(requests, atmosphereResource, websitesXPATHMapper);
+		retriever.execute(requests, atmosphereResource, htmlNodePathMapper);
 
 	}
 
 	@Override
 	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
-			String movieID) {
-		// TODO Auto-generated method stub
+			MovieTO detailsRequestModel, HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
+			InterruptedException  {
+		final HttpUriRequest request = Utils.getMovieDetailsURL(getConfigApp().getSiteConfig(), detailsRequestModel);
+		
+		retriever.execute(request,atmosphereResource, htmlNodePathMapper);
 		
 	}
 	
