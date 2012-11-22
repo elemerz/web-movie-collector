@@ -62,7 +62,7 @@
 														 'body' : message, 
 														 'footer' : (/^\s*$/.test(configs.footer) ? '' : template(configs.footerTmpl, {'footer' : configs.footer}))}));  
 				
-				return $tooltip; 
+				return $tooltip;
 			},
 			appendArrow = function($tooltip, positions) {
 				var html = $tooltip.html();
@@ -288,7 +288,7 @@
 	            
 	        request = new $.atmosphere.AtmosphereRequest();
 	        request.transport = "websocket";
-	        request.url = 'http://localhost:8080/srcMoviesAtm';
+	        request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
 	        request.contentType = "application/json";
 	        request.data = JSON.stringify(movieData);
 	        request.fallbackTransport = "long-polling";
@@ -382,7 +382,7 @@
 				window.alert('detailedData was requested');
 		        request = new $.atmosphere.AtmosphereRequest();
 		        request.transport = "websocket";
-		        request.url = 'http://localhost:8080/fullSrcMoviesAtm';
+		        request.url = 'http://localhost:8080/wmc/fullSrcMoviesAtm';
 		        request.contentType = "application/json";
 		        request.data = JSON.stringify(movieData);
 		        request.fallbackTransport = "long-polling";
@@ -466,7 +466,7 @@
 		
 			// do the ajax call to retrieve the results
 			$.ajax({
-				url : 'http://localhost:8080/searchmovies',
+				url : 'http://localhost:8080/wmc/searchmovies',
 				data : JSON.stringify(movieData),
 				type : "POST",
 				contentType : 'application/json; charset=utf-8',
