@@ -24,19 +24,22 @@ import ro.isdc.wmc.parser.impl.SourceParserImpl;
 
 @Component
 public class MovieRetriever  {
-
-	private final HttpHost proxy;
 	
+	private HttpHost proxy = null;
+
 	public MovieRetriever() {
-		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
-		
+		String proxyHost = System.getProperty("http.proxyHost");
+		String proxyPort = System.getProperty("http.proxyPort");
+		if (proxyHost != null && proxyPort != null) {
+			proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort));
+		}
 	}
 
 	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final HtmlNodePathMapper  htmlNodePathMapper) throws InterruptedException, IOReactorException  {
 		
 		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
 		initParams(httpclient);
-		httpclient.start();
+		httpclient.start(); 
 		
 		final CountDownLatch latch =  new CountDownLatch(requests.size());
 		try {
@@ -52,7 +55,7 @@ public class MovieRetriever  {
 							 String responseAsString = EntityUtils.toString(response.getEntity());
 							 SourceParserImpl parser = new SourceParserImpl();
 							 String uri = request.getURI().getHost();
-							 uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
+							  uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
 							 
 							 ArrayList<SimpleMovieInfo> movies = (ArrayList<SimpleMovieInfo>) parser.getMoviesByTitle(responseAsString, uri, htmlNodePathMapper);
 							 
@@ -65,7 +68,6 @@ public class MovieRetriever  {
 							 String moviesAsJson = mapper.writeValueAsString(movies);
 							 
 							 System.out.println(moviesAsJson);
-							 
 							
 							 atmoResource.getBroadcaster().broadcast(moviesAsJson);
 						} catch (Exception e) {
@@ -137,15 +139,18 @@ public class MovieRetriever  {
 		}
 	}
 
-
-
-
 	private void initParams(HttpAsyncClient httpclient) {
-		httpclient.getParams()
-		.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 3000)
-		.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000)
-		.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
-		.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true).setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-		
+		httpclient
+				.getParams()
+				.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 3000)
+				.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000)
+				.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE,
+						8 * 1024)
+				.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
+				.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+		if (proxy != null) {
+			httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+					proxy);
+		}
 	}
 }

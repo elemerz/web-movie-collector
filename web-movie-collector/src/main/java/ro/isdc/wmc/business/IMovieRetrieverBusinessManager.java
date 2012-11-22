@@ -1,3 +1,4 @@
+
 package ro.isdc.wmc.business;
 
 import org.apache.http.nio.reactor.IOReactorException;
@@ -35,7 +36,6 @@ public interface IMovieRetrieverBusinessManager {
 	 * @param movieID
 	 * 			the movie id for which to get details
 	 */
-	void getFullMoviesResult(AtmosphereResource atmosphereResource, MovieTO detailsRequest);
 
 	void getFullMoviesResult(AtmosphereResource atmosphereResource,
 			MovieTO detailsRequestModel, HtmlNodePathMapper htmlNodePathMapper)

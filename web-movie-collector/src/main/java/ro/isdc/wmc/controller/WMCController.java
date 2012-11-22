@@ -29,9 +29,11 @@ import ro.isdc.wmc.controller.util.AtmosphereUtil;
 import ro.isdc.wmc.init.InfoSourceConfig;
 import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
+import ro.isdc.wmc.utils.Utils;
+ 
 
 
-/**
+/** 
  * Handles requests for the application home page.
  */
 @Controller
@@ -61,6 +63,8 @@ public class WMCController extends LocaleAwareController{
 	
 	/**
 	 * The method where the atmosphere requests arrive.
+	 * Direct mapping is not possible here because 
+	 * of the Atmosphere request.
 	 * 
 	 * @param atmosphereResource
 	 * @param searchModelAsJson
@@ -72,21 +76,10 @@ public class WMCController extends LocaleAwareController{
 	@RequestMapping(value = "/srcMoviesAtm", method = RequestMethod.POST)
 	@ResponseBody
 	public void srcMoviesAtm(AtmosphereResource atmosphereResource, @RequestBody String searchModelAsJson) throws JsonGenerationException, JsonMappingException, IOException {
+		System.out.println("proxy host: " + System.getProperty("http.proxyHost"));
+		System.out.println("proxy port: " + System.getProperty("http.proxyPort"));
 		AtmosphereUtil.suspend(atmosphereResource); 
-		final ObjectMapper mapper = new ObjectMapper();
-		SearchInputModel reqSearch = null;
-		try {
-			reqSearch = mapper.readValue(searchModelAsJson, SearchInputModel.class);
-		} catch (JsonParseException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		} catch (JsonMappingException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+		SearchInputModel reqSearch = Utils.getJsonAsObject(searchModelAsJson, SearchInputModel.class);
 		
 		try {
 			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch,  htmlNodePathMapper);
