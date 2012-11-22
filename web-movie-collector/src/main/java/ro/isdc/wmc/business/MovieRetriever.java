@@ -63,6 +63,10 @@ public class MovieRetriever  {
 							 String moviesAsJson = mapper.writeValueAsString(movies);
 							 
 							 System.out.println(moviesAsJson);
+<<<<<<< HEAD
+=======
+							 
+>>>>>>> refs/remotes/origin/master
 							
 							 atmoResource.getBroadcaster().broadcast(moviesAsJson);
 						} catch (Exception e) {

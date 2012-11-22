@@ -29,8 +29,11 @@ import ro.isdc.wmc.controller.util.AtmosphereUtil;
 import ro.isdc.wmc.init.InfoSourceConfig;
 import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
+<<<<<<< HEAD
 import ro.isdc.wmc.utils.Utils;
  
+=======
+>>>>>>> refs/remotes/origin/master
 
 /** 
  * Handles requests for the application home page.

@@ -24,6 +24,7 @@ import ro.isdc.wmc.to.SiteConfigTO;
 
 
 public class Utils {
+<<<<<<< HEAD
 	
 	/**
 	 * Generic method for transforming a json to an object.
@@ -49,6 +50,8 @@ public class Utils {
 		}
 		return objectType.cast(jsonAsObject);
 	}
+=======
+>>>>>>> refs/remotes/origin/master
 		
 
 	
