@@ -19,7 +19,7 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
 
 	<bean id="initApp" class="ro.isdc.wmc.init.InfoSourceConfig" init-method="load" scope="singleton">
 		<property name="configPath">
-			<value>sitesConfig.json</value>
+			<value>sitesConfig.json</value> 
 		</property> 
 	</bean>
 	

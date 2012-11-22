@@ -2,7 +2,7 @@ package ro.isdc.wmc.business;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.nio.reactor.IOReactorException;
+import org.apache.http.nio.reactor.IOReactorException; 
 
 import ro.isdc.wmc.business.MovieRetriever;
 
