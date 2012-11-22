@@ -34,13 +34,13 @@
 .tooltip-arrow-down {
 	height: 10px;
 	margin-bottom: -10px;
-	background: url(/public/images/presentation/arrows.png) no-repeat scroll transparent;
+	background: /* url(/public/images/presentation/arrows.png) */ no-repeat scroll transparent;
 }
 
 .tooltip-arrow-up {
 	height: 10px;
 	margin-top: -10px;
-	background: url(/public/images/presentation/arrows.png) no-repeat scroll transparent;
+	background: /* url(/public/images/presentation/arrows.png) */ no-repeat scroll transparent;
 }
 
 .delimiter {

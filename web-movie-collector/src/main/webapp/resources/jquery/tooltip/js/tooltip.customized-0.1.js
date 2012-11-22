@@ -32,7 +32,7 @@
 				return result;
 			},
 			generateTooltip = function(id, $trigger) {
-				var strBody = "", message = configs.msg;
+				var strBody = "", message = configs.msg, body=[], $tooltip;
 				if (!configs.msg) {
 					message = $trigger.data('tooltipmsg');
 				} else if ($.isFunction(configs.msg)) {
@@ -40,7 +40,7 @@
 				}
 				if ($.isArray(message)) {
 					message = [];
-					var body = [];
+					body = [];
 					$.each(message, function(key, value){
 						if ($.isPlainObject(value)) {
 							body.push(template(configs.bodyTmpl,value));
@@ -57,10 +57,10 @@
 					} 
 				}
                 
-				var $tooltip = $(template(configs.htmlTmpl, {'id' : id, 
-															 'head' : (/^\s*$/.test(configs.title) ? '' : template(configs.headTmpl, {'title' : configs.title})), 
-															 'body' : message, 
-															 'footer' : (/^\s*$/.test(configs.footer) ? '' : template(configs.footerTmpl, {'footer' : configs.footer}))}));  
+				$tooltip = $(template(configs.htmlTmpl, {'id' : id, 
+														 'head' : (/^\s*$/.test(configs.title) ? '' : template(configs.headTmpl, {'title' : configs.title})), 
+														 'body' : message, 
+														 'footer' : (/^\s*$/.test(configs.footer) ? '' : template(configs.footerTmpl, {'footer' : configs.footer}))}));  
 				
 				return $tooltip;
 			},
@@ -84,10 +84,11 @@
 						arrowPos : (offset.top - $tooltip.height() - 10) < $(document).scrollTop() ? 'up' : 'down',
 						arrowOffsetLeft : (($tooltip.width() - dinamicArrowLeft - 10) < Math.round($tooltip.width() / 2) ? Math.round(dinamicArrowLeft/2)  : dinamicArrowLeft) + "px",
 						arrowOffsetTop : (offset.top - $tooltip.height() - 10) < $(document).scrollTop() ? '-70px' : 'top'
-					};
+					},
+					left;
 				if (configs.arrowHPosX === 'center' || (dinamicArrowLeft + 10) >= $tooltip.width()) {
 					positions.arrowOffsetLeft = 'center';
-					var left = (e.pageX - Math.round($tooltip.width() / 2));
+					left = (e.pageX - Math.round($tooltip.width() / 2));
 					positions.left = (left < 0 ? 0 : (left +  $tooltip.width()) > $(window).width() ? ($(window).width() - $tooltip.width()) : left);
 				}
 				return positions;
@@ -121,37 +122,44 @@
 					if (!$("." + tooltipId).is(":visible")) {
 						timeouts.displayed = tooltipId;
 						timeouts.showTimeOut[timeouts.displayed] = setTimeout(function(){
-							var $tooltip = generateTooltip(tooltipId, $trigger);						
-							$("body").append($tooltip);	
-							
-							
-							
-							 var transform = {"tag":"ul","class":"tooltipContent","children":[
+							var $tooltip = generateTooltip(tooltipId, $trigger),
+								transform = {"tag":"ul","class":"tooltipContent","children":[
                                                   {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
-								                  {'tag':'li', 'class':'tooltip-list-element', 'html':'${title}'},
-								                  {'tag':'li', 'class':'tooltip-list-element', 'html':'${year}'},
-								                  {'tag':'li', 'class':'tooltip-list-element', 'html':'${director}'}
-								                  ]
-							 				};
-							 
-							 var tooltipMap = {};
-							 var briefMovieInfo = $trigger.data('tooltipmsg');
-							 for (var item in briefMovieInfo) {
-								 var site = briefMovieInfo[item].site;							 
-								 if(!(site in tooltipMap)) {
-									 tooltipMap[site] = [];
-								 }	
-								 var myArray = tooltipMap[site];
-								 myArray.push(briefMovieInfo[item]);
+   								                  {'tag':'li', 'class':'tooltip-movie-info', 'html':'${title}'},
+   								                  {'tag':'li', 'class':'tooltip-movie-info', 'html':'${year}'},
+   								                  {'tag':'li', 'class':'tooltip-movie-info', 'html':'${director}'},
+   								                  {'tag':'li', 'class':'tooltip-movie-info', 'html':'<a class="tooltip-movie-id" href="#">${id}</a>'}
+   								                  ]
+   							 				},
+   							 	 tooltipMap = {},
+   							 	 briefMovieInfo = $trigger.data('tooltipmsg'),
+   							 	 item, site, moviesArrayPerSite,
+   							 	 positions;
+							$("body").append($tooltip);	
+
+							console.log('tooltip added to body');
+							
+							 for (item in briefMovieInfo) {
+								 if(briefMovieInfo.hasOwnProperty(item)){
+									 site = briefMovieInfo[item].site;							 
+									 if(!(site in tooltipMap)) {
+										 tooltipMap[site] = [];
+									 }	
+									 moviesArrayPerSite = tooltipMap[site];
+									 moviesArrayPerSite.push(briefMovieInfo[item]);
+								 }
 							 }
 														 
-							 for(var item in tooltipMap){
-								 $('.tooltip-body').append("<div class=\"" + item + " site"+"\"/>");
-								 $('.'+item).append("<p class=\"tooltip-header\">" + item.toUpperCase() + "</p>");
-								 $('.'+item).json2html(tooltipMap[item],transform);
+							 for(item in tooltipMap){
+								 if(tooltipMap.hasOwnProperty(item)){
+									 $('.tooltip-body').append("<div class=\"" + item + " site"+"\"/>");
+									 $('.'+item).append("<p class=\"tooltip-header\">" + item.toUpperCase() + "</p>");
+									 $('.'+item).json2html(tooltipMap[item],transform);	 
+								 }
 							 }  	
+							console.log('json2html done'); 
 							
-							var positions = computePositions($this, $tooltip, e);
+							positions = computePositions($this, $tooltip, e);
 							$tooltip.css({'left' : positions.left, 'top' : positions.top});
 							$tooltip = appendArrow($tooltip, positions);
 							timeouts.hideTimeOut[timeouts.displayed] = true;
@@ -161,10 +169,11 @@
 									'top' : (positions.arrowPos === 'up' ? '-='+ configs.animate + 'px' : '+=' + configs.animate + 'px')
 								}, {duration : 'slow', queue : false}).mouseover(function(){
 									clearTimeout(timeouts.clearOutTime);
-								})
+								});
 							} else {
 								$tooltip.show(configs.displaytime);
 							}
+							
 							$tooltip.mouseout(function(){
 								timeouts.clearOutTime = setTimeout(function(){
 									hideTooltip($tooltip, timeouts);
@@ -182,7 +191,7 @@
 						clearTimeout(timeouts.showTimeOut[tooltipId]);
 						if(timeouts.hideTimeOut[timeouts.displayed]) {
 							timeouts.clearOutTime = setTimeout(function(){
-								hideTooltip($current, timeouts);
+								hideTooltip($current, timeouts);								
 							}, 200);
 						} else {
 							timeouts.clearOutTime = 0;
@@ -190,12 +199,12 @@
 						}	
 				});
 				// handle window scroll or scrollable sections
-				$('.scrollable').scroll(function(e){onScroll()});
-				$(window).scroll(function(e){onScroll()});
+				$('.scrollable').scroll(function(e){onScroll();});
+				$(window).scroll(function(e){onScroll();});
 			});
 		}
 	});
 	
-	$('.tooltip-aware').tooltip();
+	//$('.tooltip-aware').tooltip();
 	
 }(jQuery));

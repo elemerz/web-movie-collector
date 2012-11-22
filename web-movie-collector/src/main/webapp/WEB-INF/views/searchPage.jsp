@@ -16,16 +16,16 @@
  <ul class="search-results ui-layout-center">
  	<li>Movie titles here</li>
  </ul>
-	<ul class="info-sources ui-layout-south ui-helper-clearfix">
-		<c:forEach var="infoSource" items="${infoSources}">
-			<li class="info-source"><input type="checkbox" id="${infoSource}" value="${infoSource}" /><label for="${infoSource}">${infoSource}</label></li>
-		</c:forEach>
-	</ul>
+ <ul class="info-sources ui-layout-south ui-helper-clearfix">
+	<c:forEach var="infoSource" items="${infoSources}">
+		<li class="info-source"><input type="checkbox" id="${infoSource}" value="${infoSource}" /><label for="${infoSource}">${infoSource}</label></li>
+	</c:forEach>
+ </ul>
  <aside class="ui-layout-east">Movie Details Zone</aside>	
 </section>	
 <footer class="main ui-layout-south"><h5>Page Footer</h5></footer>
 <%-- MovieItemTemplate --%>	
-<textarea id="searchItemTmpl" class="ui-helper-hidden"><li><a href="#">{label}<strong class="search-term">remove</strong></a></li></textarea>
+<textarea id="searchItemTmpl" class="ui-helper-hidden"><div><h1>{label}<strong class="search-term"> remove</strong></h1><div id={label}></div></div></textarea>
 <%--Messages Component--%>
 <input type="hidden" class="messages"
 data-searchPage.no.infosource.selected='<spring:message code="searchPage.no.infosource.selected"/>'
