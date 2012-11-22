@@ -25,7 +25,7 @@
 </section>	
 <footer class="main ui-layout-south"><h5>Page Footer</h5></footer>
 <%-- MovieItemTemplate --%>	
-<textarea id="searchItemTmpl" class="ui-helper-hidden"><div><h1>{label}<strong class="search-term"> remove</strong></h1><div id={briefMovieData}></div></div></textarea>
+<textarea id="searchItemTmpl" class="ui-helper-hidden"><div><h1>{label}<strong class="search-term"> remove</strong></h1><div id={label}></div></div></textarea>
 <%--Messages Component--%>
 <input type="hidden" class="messages"
 data-searchPage.no.infosource.selected='<spring:message code="searchPage.no.infosource.selected"/>'
