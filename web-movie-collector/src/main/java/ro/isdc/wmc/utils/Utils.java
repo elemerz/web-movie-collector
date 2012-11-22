@@ -17,8 +17,9 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import ro.isdc.wmc.model.SearchInputModel;
-import ro.isdc.wmc.model.SimpleMovie;
+import ro.isdc.wmc.model.SimpleMovieInfo;
 import ro.isdc.wmc.to.ConfigInfoSrcTO;
+import ro.isdc.wmc.to.MovieTO;
 import ro.isdc.wmc.to.SiteConfigTO;
 
 
@@ -49,17 +50,7 @@ public class Utils {
 		return objectType.cast(jsonAsObject);
 	}
 		
-	
-	public static List<HttpUriRequest> parseRequestsURLs(ArrayList<String> urls) {
-		
-		List<HttpUriRequest> result = new ArrayList<HttpUriRequest>();
-		for (String url : urls) {
-			result.add(new HttpGet(url));
-		}
-		
-		return result;
-	}
-	
+
 	
 	/**
 	 * Method for retrieving the urls for sites.
@@ -125,18 +116,42 @@ public class Utils {
 		return uriList;
 	}
 	
-	public static ArrayList<SimpleMovie> parseMoviesResult(ArrayList<SimpleMovie> moviesArray, String searchTerm) {
+public static HttpUriRequest getMovieDetailsURL(SiteConfigTO siteConfig, MovieTO detailsRequestModel) {
+				
+		Map<String, ConfigInfoSrcTO> configMap = siteConfig.getConfigMap();
+		HttpUriRequest uri = null;
 		
-		ArrayList<String> ids = new ArrayList<String>();
+		ConfigInfoSrcTO configSite =  configMap.get(detailsRequestModel.getSite());
 		
-		for (SimpleMovie simpleMovie : moviesArray) { 
-	/*		if(!simpleMovie.getTitle().contains(searchTerm)) ids.add(moviesArray.indexOf(simpleMovie));*/
-		}
-		
-		
-		//moviesArray.remove(simpleMovie)
-		//TODO remove duplicate [movie title + year]	
-		return (ArrayList<SimpleMovie>) moviesArray.subList(0, 4);
+		if (configSite != null ) {
+			
+			if (configSite.getBriefSearchMethod().equalsIgnoreCase("post"))
+			{
+				Map<String, String> postMap = configSite.getFullPostData();
+				Iterator<Entry<String, String>> postIt = postMap.entrySet().iterator();
+				
+				uri = new HttpPost(configSite.getFullSearchURL());
+				HttpParams postParams = new BasicHttpParams();
+				
+				while(postIt.hasNext()) {
+					Entry<String, String> pairsPost = postIt.next();
+					
+					if(pairsPost.getValue().equalsIgnoreCase("{movieId}")) {
+						pairsPost.getValue().replace("{movieId}", detailsRequestModel.getMovieId());
+					}
+					
+					postParams.setParameter(pairsPost.getKey(), pairsPost.getValue());
+					System.out.println(pairsPost.getKey() + " = " + pairsPost.getValue());
+					}
+				uri.setParams(postParams);
+				
+			}
+			// Build the Get URLs 
+			else if (configSite.getBriefSearchMethod().equalsIgnoreCase("get")) {
+				uri = new HttpGet(configSite.getFullSearchURL().replace("{movieId}", detailsRequestModel.getMovieId()));
+			}
+			
+		}	
+		return uri;		
 	}
-	
 }
