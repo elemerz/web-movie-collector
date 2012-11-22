@@ -78,7 +78,7 @@
 	            
 	        request = new $.atmosphere.AtmosphereRequest();
 	        request.transport = "websocket";
-	        request.url = 'http://localhost:8080/srcMoviesAtm';
+	        request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
 	        request.contentType = "application/json";
 	        request.data = JSON.stringify(movieData);
 	        request.fallbackTransport = "long-polling";
@@ -94,7 +94,7 @@
 	            
 	            if(response.state === "messageReceived"){
 	            	$.atmosphere.log('info', ["message received: " + response.state]);
-	            	var tooltipData = JSON.stringify($.parseJSON(response.responseBody).basicMoviesArray);
+	            	var tooltipData = response.responseBody;
 					$(searchItemTmpl.tmpl({
 						"label" : movieTitle
 					})).appendTo(contentArea).children().attr('data-tooltipmsg', tooltipData).tooltip();
