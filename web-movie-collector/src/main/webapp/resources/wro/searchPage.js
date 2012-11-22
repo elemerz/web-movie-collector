@@ -62,7 +62,7 @@
 														 'body' : message, 
 														 'footer' : (/^\s*$/.test(configs.footer) ? '' : template(configs.footerTmpl, {'footer' : configs.footer}))}));  
 				
-				return $tooltip; 
+				return $tooltip;
 			},
 			appendArrow = function($tooltip, positions) {
 				var html = $tooltip.html();
