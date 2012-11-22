@@ -15,7 +15,7 @@ import org.apache.http.params.HttpParams;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-
+ 
 import ro.isdc.wmc.model.SearchInputModel;
 import ro.isdc.wmc.model.SimpleMovieInfo;
 import ro.isdc.wmc.to.ConfigInfoSrcTO;

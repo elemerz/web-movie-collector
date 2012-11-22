@@ -11,7 +11,7 @@ public class MovieRetrieverThread extends Thread {
 	private MovieRetriever mr = new MovieRetriever();
 	
 	
-	public void run() {
+	public void run() { 
     	//Code
 		System.out.println(Thread.currentThread().getName());
 		HttpUriRequest req = new HttpGet("www.imdb.com");

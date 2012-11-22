@@ -6,7 +6,7 @@ import org.atmosphere.cpr.AtmosphereResource;
 import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
 import ro.isdc.wmc.to.MovieTO;
-
+ 
 /**
  * Interface defining the contract for 
  * movie retriever implementations.

@@ -14,13 +14,13 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
 	<bean id="wroFilter" class="ro.isdc.wro.http.ConfigurableWroFilter">
 		<property name="debug" value="true" />
 		<property name="cacheUpdatePeriod" value="0" />
-		<property name="modelUpdatePeriod" value="0" />
+		<property name="modelUpdatePeriod" value="0" /> 
 	</bean>
 
 	<bean id="initApp" class="ro.isdc.wmc.init.InfoSourceConfig" init-method="load" scope="singleton">
 		<property name="configPath">
 			<value>sitesConfig.json</value>
-		</property>
+		</property> 
 	</bean>
 	
 	<bean id="htmlNodePathMapper" class="ro.isdc.wmc.model.HtmlNodePathMapper">

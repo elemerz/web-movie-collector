@@ -34,7 +34,7 @@ public class MovieRetriever  {
 		
 		HttpAsyncClient httpclient = new DefaultHttpAsyncClient();
 		initParams(httpclient);
-		httpclient.start();
+		httpclient.start(); 
 		
 		final CountDownLatch latch =  new CountDownLatch(requests.size());
 		try {

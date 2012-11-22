@@ -59,7 +59,7 @@ public class MovieRetrieverBusinessManager implements
 		
 		retriever.execute(request,atmosphereResource, htmlNodePathMapper);
 		
-	}
+	} 
 	
 	
 	@Override
