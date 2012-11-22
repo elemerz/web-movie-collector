@@ -94,7 +94,7 @@
 	            
 	            if(response.state === "messageReceived"){
 	            	$.atmosphere.log('info', ["message received: " + response.state]);
-	            	var tooltipData = JSON.stringify($.parseJSON(response.responseBody).basicMoviesArray);
+	            	var tooltipData = response.responseBody;
 					$(searchItemTmpl.tmpl({
 						"label" : movieTitle
 					})).appendTo(contentArea).children().attr('data-tooltipmsg', tooltipData).tooltip();
