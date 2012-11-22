@@ -16,6 +16,8 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import ro.isdc.wmc.model.SimpleMovie;
@@ -25,12 +27,10 @@ import ro.isdc.wmc.parser.impl.SourceParserImpl;
 @Component
 public class MovieRetriever  {
 
-	private final HttpHost proxy;
-	
-	public MovieRetriever() {
+   /*public MovieRetriever() {
 		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
 		
-	}
+	}*/
 
 	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final WebsitesXPATHMapper  websitesXPATHMapper) throws InterruptedException, IOReactorException  {
 		
@@ -65,7 +65,7 @@ public class MovieRetriever  {
 							 final ObjectMapper mapper = new ObjectMapper();
 							 String moviesAsJson = mapper.writeValueAsString(movies);
 							 System.out.println(moviesAsJson);
-							 //atmoResource.getBroadcaster().broadcast(moviesAsJson);
+							 atmoResource.getBroadcaster().broadcast(moviesAsJson);
 							 //resultOBJ.setBasicMoviesArray(movies); 						
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -144,10 +144,11 @@ public class MovieRetriever  {
 		}
 	}
 
-
-
-
 	private void initParams(HttpAsyncClient httpclient) {
+		String proxyHost = System.getProperty("http.proxyHost");
+		Integer proxyPort = Integer.parseInt(System.getProperty("http.proxyPort"));
+		HttpHost proxy  = new HttpHost(proxyHost, proxyPort);
+		
 		httpclient.getParams()
 		.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 3000)
 		.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000)

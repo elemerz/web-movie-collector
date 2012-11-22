@@ -1,5 +1,6 @@
 package ro.isdc.wmc.utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import ro.isdc.wmc.model.SearchInputModel;
 import ro.isdc.wmc.model.SimpleMovie;
@@ -19,6 +23,31 @@ import ro.isdc.wmc.to.SiteConfigTO;
 
 
 public class Utils {
+	
+	/**
+	 * Generic method for transforming a json to an object.
+	 * @param <T>
+	 * @param jsonString
+	 * @param objectType
+	 * @return
+	 */
+	public static <T extends Object> T getJsonAsObject(String jsonString, Class<T> objectType) {
+		Object jsonAsObject = null;
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			jsonAsObject = mapper.readValue(jsonString, objectType);
+		} catch (JsonParseException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (JsonMappingException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		return objectType.cast(jsonAsObject);
+	}
 		
 	
 	public static List<HttpUriRequest> parseRequestsURLs(ArrayList<String> urls) {

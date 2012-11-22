@@ -31,7 +31,6 @@ public class MovieRetrieverBusinessManager implements
 				.getSiteConfig(), reqSearch);
 
 		retriever.execute(requests, atmosphereResource, websitesXPATHMapper);
-
 	}
 
 	@Override
