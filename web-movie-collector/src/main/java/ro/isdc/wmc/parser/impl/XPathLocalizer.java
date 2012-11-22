@@ -1,7 +1,10 @@
 package ro.isdc.wmc.parser.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
@@ -15,11 +18,19 @@ import ro.isdc.wmc.model.SimpleMovieInfo;
 
 public class XPathLocalizer  implements ElementLocalizer {
 	
-	ArrayList<SimpleMovieInfo> moviesResult = new ArrayList<SimpleMovieInfo>();
+	ArrayList<SimpleMovieInfo> moviesResults = new ArrayList<SimpleMovieInfo>();
 	SimpleHtmlSerializer htmlSerializer = null;	
 
+	/**
+	 * Retrieve the list of simple movie results 
+	 * 
+	 *  parsed in such a way that we have a maximum of 10 entries - no duplicates
+	 * 
+	 */
 	@Override
 	public List<SimpleMovieInfo> getMoviesByTitle(String htmlContent, String websiteId, HtmlNodePathMapper htmlNodePathMapper) {
+		
+		Map<String, SimpleMovieInfo> movieResultsMap = new HashMap<String, SimpleMovieInfo>();
 		
 	    try {
 	    	String listXpath = htmlNodePathMapper.getNodePathMap().get(websiteId + ".list");
@@ -37,14 +48,22 @@ public class XPathLocalizer  implements ElementLocalizer {
 					movieItem.setDirector(director);
 					movieItem.setId(id);
 					movieItem.setSite(websiteId);
-					moviesResult.add(movieItem);	
+					movieResultsMap.put(title+year, movieItem);
+//					moviesResults.add(movieItem);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	    
-		return moviesResult;
+	    Iterator<String> it = movieResultsMap.keySet().iterator();
+	    int counter = 0;
+		while(it.hasNext() && counter < 9) {
+			moviesResults.add(movieResultsMap.get(it.next()));
+			counter++;
+		}
+	    
+		return moviesResults;
 	}
 
 	@Override
