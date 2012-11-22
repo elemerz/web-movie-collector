@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 public class BasicMoviesResult {
 	
-	ArrayList<SimpleMovie> basicMoviesArray;
+	ArrayList<SimpleMovieInfo> basicMoviesArray;
 
-	public ArrayList<SimpleMovie> getBasicMoviesArray() {
+	public ArrayList<SimpleMovieInfo> getBasicMoviesArray() {
 		return basicMoviesArray;
 	}
 
-	public void setBasicMoviesArray(ArrayList<SimpleMovie> basicMoviesArray) {
+	public void setBasicMoviesArray(ArrayList<SimpleMovieInfo> basicMoviesArray) {
 		this.basicMoviesArray = basicMoviesArray;
 	}
 }

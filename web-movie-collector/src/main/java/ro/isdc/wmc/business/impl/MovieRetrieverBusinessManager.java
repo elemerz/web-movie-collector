@@ -35,16 +35,7 @@ public class MovieRetrieverBusinessManager implements
 
 	}
 
-	@Override
-	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
-			MovieTO detailsRequestModel, HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
-			InterruptedException  {
-		final HttpUriRequest request = Utils.getMovieDetailsURL(getConfigApp().getSiteConfig(), detailsRequestModel);
-		
-		retriever.execute(request,atmosphereResource, htmlNodePathMapper);
-		
-	}
-	
+
 	/**
 	 * @return the configApp
 	 */
@@ -58,6 +49,24 @@ public class MovieRetrieverBusinessManager implements
 	 */
 	public void setConfigApp(InfoSourceConfig configApp) {
 		this.configApp = configApp;
+	}
+
+	@Override
+	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
+			MovieTO detailsRequestModel, HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
+			InterruptedException  {
+		final HttpUriRequest request = Utils.getMovieDetailsURL(getConfigApp().getSiteConfig(), detailsRequestModel);
+		
+		retriever.execute(request,atmosphereResource, htmlNodePathMapper);
+		
+	}
+
+
+	@Override
+	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
+			MovieTO detailsRequest) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

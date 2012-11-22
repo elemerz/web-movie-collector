@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>web-movie-collector</name>
-	<comment></comment>
+	<name>wmc</name>
+	<comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
 	<projects>
 	</projects>
 	<buildSpec>
@@ -46,6 +46,11 @@
 			</arguments>
 		</buildCommand>
 		<buildCommand>
+			<name>org.springframework.ide.eclipse.core.springbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
 			<name>org.eclipse.m2e.core.maven2Builder</name>
 			<arguments>
 			</arguments>
@@ -59,5 +64,13 @@
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 		<nature>com.googlecode.jslint4java.eclipse.jsLintNature</nature>
+		<nature>org.springframework.ide.eclipse.core.springnature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>test</name>
+			<type>2</type>
+			<location>D:/test-repos/web-movie-collector/web-movie-collector/src/test</location>
+		</link>
+	</linkedResources>
 </projectDescription>

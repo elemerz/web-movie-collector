@@ -2,7 +2,7 @@
   "configMap": {
   "imdb":{
     "briefSearchURL":"http://www.imdb.com/search/title?title={title}/",
-    "fullSearchURL":"http://www.imdb.com/search/title?title={title}/",
+    "fullSearchURL":"http://http://www.imdb.com/title/{movieId}/",
     "briefSearchMethod":"get",
     "fullSearchMethod": "get",
     "briefPostData":{},
@@ -12,7 +12,7 @@
   },
  "filmkatalogus": {
     "briefSearchURL":"http://www.filmkatalogus.hu/kereses",
-    "fullSearchURL":"http://www.filmkatalogus.hu/kereses",
+    "fullSearchURL":"http://www.filmkatalogus.hu/{movieId}",
     "briefSearchMethod": "post",
     "fullSearchMethod": "get",
     "briefPostData": {

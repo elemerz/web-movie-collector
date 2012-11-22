@@ -3,6 +3,8 @@ package ro.isdc.wmc.controller;
 import java.io.IOException;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.atmosphere.cpr.AtmosphereResource;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
@@ -14,29 +16,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 import ro.isdc.wmc.business.IMovieRetrieverBusinessManager;
 import ro.isdc.wmc.controller.util.AtmosphereUtil;
 import ro.isdc.wmc.init.InfoSourceConfig;
+import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
-import ro.isdc.wmc.model.WebsitesXPATHMapper;
 
 
 /**
  * Handles requests for the application home page.
  */
 @Controller
-public class WMCController {
+public class WMCController extends LocaleAwareController{
 	
 	@Autowired
 	private InfoSourceConfig infoSourceConfig;
 	
 	@Autowired
-	WebsitesXPATHMapper websitesXPATHMapper;	
+	HtmlNodePathMapper htmlNodePathMapper;	
 	
 	@Autowired
 	@Qualifier("movieRetrieverBM")
@@ -49,12 +54,10 @@ public class WMCController {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(final Model model) {	 
-	    
-	    Set<String> infoSources = infoSourceConfig.getSiteConfig().getConfigMap().keySet();
+		Set<String> infoSources = infoSourceConfig.getSiteConfig().getConfigMap().keySet();
 		model.addAttribute("infoSources", infoSources);
 		return "searchPage"; 
 	}
-	
 	
 	/**
 	 * The method where the atmosphere requests arrive.
@@ -86,7 +89,7 @@ public class WMCController {
 		}
 		
 		try {
-			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch,  websitesXPATHMapper);
+			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch,  htmlNodePathMapper);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
