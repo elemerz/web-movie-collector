@@ -7,7 +7,7 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
 	<bean id="placeholderConfig"
      	 class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
    	 	<property name="location"
-    	  value="classpath:application.properties" />
+    	  value="classpath:application.properties" /> 
   	</bean>
 
 	<!-- Root Context: defines shared resources visible to all other web components -->

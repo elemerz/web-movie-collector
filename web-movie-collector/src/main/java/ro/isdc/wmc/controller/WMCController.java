@@ -32,7 +32,7 @@ import ro.isdc.wmc.model.SearchInputModel;
 import ro.isdc.wmc.utils.Utils;
 
 
-/**
+/** 
  * Handles requests for the application home page.
  */
 @Controller

@@ -12,7 +12,7 @@ public class MovieRetrieverThread extends Thread {
 	
 	
 	public void run() { 
-    	//Code
+    	/*//Code
 		System.out.println(Thread.currentThread().getName());
 		HttpUriRequest req = new HttpGet("www.imdb.com");
 		try {
@@ -24,5 +24,5 @@ public class MovieRetrieverThread extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    }
+*/    }
 }

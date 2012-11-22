@@ -27,7 +27,7 @@ public class MovieRetriever  {
 
    /*public MovieRetriever() {
 		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
-		
+		 
 	}*/
 
 	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final HtmlNodePathMapper  htmlNodePathMapper) throws InterruptedException, IOReactorException  {
