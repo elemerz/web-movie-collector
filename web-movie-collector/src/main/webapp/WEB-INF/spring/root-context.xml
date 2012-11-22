@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <beans 
 xmlns="http://www.springframework.org/schema/beans"
@@ -32,33 +31,4 @@ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.sprin
 	  </property>
 	 </bean>	
 </beans>
-=======
-<?xml version="1.0" encoding="UTF-8"?>
-<beans 
-xmlns="http://www.springframework.org/schema/beans"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd"
->
 
-	<!-- Root Context: defines shared resources visible to all other web components -->
-	<bean id="wroFilter" class="ro.isdc.wro.http.ConfigurableWroFilter">
-		<property name="debug" value="true" />
-		<property name="cacheUpdatePeriod" value="0" />
-		<property name="modelUpdatePeriod" value="0" />
-	</bean>
-
-	<bean id="initApp" class="ro.isdc.wmc.init.InfoSourceConfig" init-method="load" scope="singleton">
-		<property name="configPath">
-			<value>sitesConfig.json</value>
-		</property>
-	</bean>
-	
-	<bean id="htmlNodePathMapper" class="ro.isdc.wmc.model.HtmlNodePathMapper">
-	  <property name="nodePathMap">
-	   <bean class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-	    <property name="location" value="xpath.properties"/>
-	   </bean>
-	  </property>
-	 </bean>	
-</beans>
->>>>>>> refs/remotes/origin/master

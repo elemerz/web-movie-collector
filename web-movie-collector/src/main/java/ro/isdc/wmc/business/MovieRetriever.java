@@ -24,11 +24,16 @@ import ro.isdc.wmc.parser.impl.SourceParserImpl;
 
 @Component
 public class MovieRetriever  {
+	
+	private HttpHost proxy = null;
 
-   /*public MovieRetriever() {
-		this.proxy  = new HttpHost("172.17.0.10", 8080) ;
-		 
-	}*/ 
+	public MovieRetriever() {
+		String proxyHost = System.getProperty("http.proxyHost");
+		String proxyPort = System.getProperty("http.proxyPort");
+		if (proxyHost != null && proxyPort != null) {
+			proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort));
+		}
+	}
 
 	public void execute(List<HttpUriRequest> requests, final AtmosphereResource atmoResource,   final HtmlNodePathMapper  htmlNodePathMapper) throws InterruptedException, IOReactorException  {
 		
@@ -134,19 +139,18 @@ public class MovieRetriever  {
 		}
 	}
 
-
-
-
 	private void initParams(HttpAsyncClient httpclient) {
-		String proxyHost = System.getProperty("http.proxyHost");
-		Integer proxyPort = Integer.parseInt(System.getProperty("http.proxyPort"));
-		HttpHost proxy  = new HttpHost(proxyHost, proxyPort);
-		
-		httpclient.getParams()
-		.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 3000)
-		.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000)
-		.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
-		.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true).setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-		
+		httpclient
+				.getParams()
+				.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 3000)
+				.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000)
+				.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE,
+						8 * 1024)
+				.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
+				.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+		if (proxy != null) {
+			httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+					proxy);
+		}
 	}
 }
