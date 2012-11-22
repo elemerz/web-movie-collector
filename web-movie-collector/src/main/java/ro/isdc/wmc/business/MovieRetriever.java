@@ -50,7 +50,7 @@ public class MovieRetriever  {
 							 String responseAsString = EntityUtils.toString(response.getEntity());
 							 SourceParserImpl parser = new SourceParserImpl();
 							 String uri = request.getURI().getHost();
-							 uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
+							  uri = uri.subSequence(uri.indexOf('.') + 1, uri.lastIndexOf('.')).toString();
 							 
 							 ArrayList<SimpleMovieInfo> movies = (ArrayList<SimpleMovieInfo>) parser.getMoviesByTitle(responseAsString, uri, htmlNodePathMapper);
 							 
