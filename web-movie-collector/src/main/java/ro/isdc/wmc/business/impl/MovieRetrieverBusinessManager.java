@@ -60,6 +60,14 @@ public class MovieRetrieverBusinessManager implements
 		retriever.execute(request,atmosphereResource, htmlNodePathMapper);
 		
 	}
+	
+	
+	@Override
+	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
+			MovieTO detailsRequest) {
+		// TODO Auto-generated method stub
+		
+	}
 
 
 }
