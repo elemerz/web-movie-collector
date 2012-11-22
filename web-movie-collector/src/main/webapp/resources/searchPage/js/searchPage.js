@@ -81,6 +81,7 @@
 	        request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
 	        request.contentType = "application/json";
 	        request.data = JSON.stringify(movieData);
+	        $.atmosphere.log('info',["request.data:"+request.data]);
 	        request.fallbackTransport = "long-polling";
 	        request.method = "POST";
 	        request.dataType = "text";
@@ -94,17 +95,44 @@
 	            
 	            if(response.state === "messageReceived"){
 	            	$.atmosphere.log('info', ["message received: " + response.state]);
-	            	var tooltipData = response.responseBody;
-					$(searchItemTmpl.tmpl({
-						"label" : movieTitle
-					})).appendTo(contentArea).children().attr('data-tooltipmsg', tooltipData).tooltip();
-	
-					that.briefMovieInfo = response.responseBody.basicMoviesArray;
-	        	}
+	            	if(response.responseBody!=="[]"){
+	            		var tooltipData = response.responseBody,
+	            		transform = {"tag":"ul","class":"accordionContent","children":[
+	                                  {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
+						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${title}'},
+						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${year}'},
+						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${director}'},
+						              {'tag':'li', 'class':'accordion-movie-info', 'html':'<a class="accordion-movie-id" id=${id} href="#">${id}</a>'}
+						          ]};
+		            	$(searchItemTmpl.tmpl({
+							"label" : movieTitle,
+							"briefMovieData": movieTitle
+						})).appendTo(contentArea).accordion({heightStyle: "content", collapsible: true, active: false}).children('h1').attr('data-tooltipmsg', tooltipData);//.tooltip();
+		
+						that.briefMovieInfo = response.responseBody;
+						$('#'+movieTitle).json2html($.parseJSON(tooltipData),transform);
+	            	}//end if(response.responseBody.length>0)
+	            	else{ //the response is empty
+	            		$(searchItemTmpl.tmpl({
+							"label" : movieTitle + "(empty)"
+							//"briefMovieData": movieTitle
+						})).appendTo(contentArea).addClass("ui-state-disabled").accordion({heightStyle: "content",collapsible: true, active: false});
+	            	}
+	        	 }// end if(response.state==="messageReceived")
 	        }
 	        
 	        request.onMessage = function(response){
-	            buildTemplate(response);
+	            
+	        	buildTemplate(response);
+	            
+	            $('.search-term').on('click',function(){
+					console.log('removing the searched item');
+					 $(this).closest('div').remove();
+				});
+				
+	            $('.accordion-movie-id').on('click',function(){
+					$('.ui-layout-east').append($(this).closest('ul').html());
+				});
 	        };
 	
 	        request.onMessagePublished = function(response){
@@ -112,43 +140,7 @@
 	        };
 	
 	        request.onOpen = function() { 
-	        	$.atmosphere.log('info', ['socket open']); 
-	        	var tooltipData = JSON.stringify([
-	                              {
-	                                  "title": "Batman",
-	                                  "year": "2008",
-	                                  "site": "imdb",
-	                                  "id": "109101",
-	                                  "director": "C.Nolan"
-	                              },
-	                              {
-	                                  "title": "Batman2",
-	                                  "year": "2009",
-	                                  "site": "filmkatalogus",
-	                                  "id": "109102",
-	                                  "director": "Chr.Nolan"
-	                              }
-	                          ]),
-	                  transform = {"tag":"ul","class":"accordionContent","children":[
-	                                  {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
-						              {'tag':'li', 'class':'tooltip-movie-info', 'html':'${title}'},
-						              {'tag':'li', 'class':'tooltip-movie-info', 'html':'${year}'},
-						              {'tag':'li', 'class':'tooltip-movie-info', 'html':'${director}'},
-						              {'tag':'li', 'class':'tooltip-movie-info', 'html':'<a class="tooltip-movie-id" id=${id} href="#">${id}</a>'}
-						          ]};
-				$(searchItemTmpl.tmpl({
-					"label" : movieTitle,
-					"briefMovieData": movieTitle
-				})).appendTo(contentArea).accordion({heightStyle: "content", collapsible: true, active: false}).children('h1').attr('data-tooltipmsg', tooltipData);//.tooltip();
-				$('#'+movieTitle).json2html($.parseJSON(tooltipData),transform);
-				$('.search-term').on('click',function(){
-					console.log('attempted removal of search item');
-					 $(this).closest('div').remove();
-				});
-				$('.tooltip-movie-id').on('click',function(){
-					$('.ui-layout-east').append($(this).closest('ul').html());
-				});
-	
+	        	$.atmosphere.log('info', ['socket open']); 	        	
 	        };
 	        request.onError =  function() { $().message(that.$msg.data('searchpage.server.error'),true);$.atmosphere.log('info', ['socket error']); };
 	        request.onReconnect =  function() { $.atmosphere.log('info', ['socket reconnect']); };
@@ -156,69 +148,67 @@
 	        subSocket = socket.subscribe(request);
         },
         showDetailedData: function(e) {            
-				var that= this,
-					socket = $.atmosphere,
-					request = null,
-					subSocket = null,
-					$el = $(e.target), 
-					movieData = {
-					"sites" : [],
-					"movies" : []
-					}, 
-					movieTitle = $('.movie-title',this.$ctx).val(), 
-					contentArea = $('.search-results',this.$ctx), 
-					searchItemTmpl = $('#searchItemTmpl').val();
+			var that= this,
+				socket = $.atmosphere,
+				request = null,
+				subSocket = null,
+				$el = $(e.target), 
+				movieData = {
+				"sites" : [],
+				"movies" : []
+				}, 
+				movieTitle = $('.movie-title',this.$ctx).val(), 
+				contentArea = $('.search-results',this.$ctx), 
+				searchItemTmpl = $('#searchItemTmpl').val();
+
+			window.alert('detailedData was requested');
+	        request = new $.atmosphere.AtmosphereRequest();
+	        request.transport = "websocket";
+	        request.url = 'http://localhost:8080/wmc/fullSrcMoviesAtm';
+	        request.contentType = "application/json";
+	        request.data = JSON.stringify(movieData);
+	        request.fallbackTransport = "long-polling";
+	        request.method = "POST";
+	        request.dataType = "text";
+	        //request.callback = buildTemplate;
+        
+	        function showDetailedMovieData(response){
+	        	
+	            $.atmosphere.log('info', ["detailedResponse.state: " + response.state]);
+	            $.atmosphere.log('info', ["detailedResponse.transport: " + response.transport]);
+	            $.atmosphere.log('info', ["detailedResponse.responseBody: " + response.responseBody]);
+	            
+	            if(response.state === "messageReceived"){
+	            	$.atmosphere.log('info', ["detailed message received: " + response.state]);  
+	            	var detailedData = JSON.stringify([
+                          {
+                              "title": "Batman",
+                              "year": "2008",
+                              "site": "imdb",
+                              "id": "109101",
+                              "director": "C.Nolan"
+                          },
+                          {
+                              "title": "Batman2",
+                              "year": "2009",
+                              "site": "filmkatalogus",
+                              "id": "109102",
+                              "director": "Chr.Nolan"
+                          }
+                      ]);
+	 				$('.ui-layout-east').append('<div>'+detailedData+'</div');
+	        	}
+	        }
+        
+	        request.onMessage = function(response){
+	            showDetailedMovieData(response);
+	        };
 	
-				window.alert('detailedData was requested');
-		        request = new $.atmosphere.AtmosphereRequest();
-		        request.transport = "websocket";
-		        request.url = 'http://localhost:8080/wmc/fullSrcMoviesAtm';
-		        request.contentType = "application/json";
-		        request.data = JSON.stringify(movieData);
-		        request.fallbackTransport = "long-polling";
-		        request.method = "POST";
-		        request.dataType = "text";
-		        //request.callback = buildTemplate;
-	        
-		        function showDetailedMovieData(response){
-		        	
-		            $.atmosphere.log('info', ["detailedResponse.state: " + response.state]);
-		            $.atmosphere.log('info', ["detailedResponse.transport: " + response.transport]);
-		            $.atmosphere.log('info', ["detailedResponse.responseBody: " + response.responseBody]);
-		            
-		            if(response.state === "messageReceived"){
-		            	$.atmosphere.log('info', ["detailed message received: " + response.state]);            					
-		        	}
-		        }
-	        
-		        request.onMessage = function(response){
-		            showDetailedMovieData(response);
-		        };
-		
-		        request.onMessagePublished = function(response){
-		
-		        };
+	        request.onMessagePublished = function(response){
+	        };
 	
 	        request.onOpen = function() { 
 	        	$.atmosphere.log('info', ['detailed data request socket open']); 
-	        	var detailedData = JSON.stringify([
-	        	                                  {
-	        	                                      "title": "Batman",
-	        	                                      "year": "2008",
-	        	                                      "site": "imdb",
-	        	                                      "id": "109101",
-	        	                                      "director": "C.Nolan"
-	        	                                  },
-	        	                                  {
-	        	                                      "title": "Batman2",
-	        	                                      "year": "2009",
-	        	                                      "site": "filmkatalogus",
-	        	                                      "id": "109102",
-	        	                                      "director": "Chr.Nolan"
-	        	                                  }
-	        	                              ]);
-				$('.ui-layout-east').append('<div>'+detailedData+'</div');
-	
 	        };
 	        request.onError =  function() { $().message(that.$msg.data('searchpage.server.error'),true);$.atmosphere.log('info', ['socket error']); };
 	        request.onReconnect =  function() { $.atmosphere.log('info', ['socket reconnect']); };
