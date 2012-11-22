@@ -16,7 +16,6 @@
  <ul class="search-results ui-layout-center">
  	<li>Movie titles here</li>
  </ul>
-
  <ul class="info-sources ui-layout-south ui-helper-clearfix">
 	<c:forEach var="infoSource" items="${infoSources}">
 		<li class="info-source"><input type="checkbox" id="${infoSource}" value="${infoSource}" /><label for="${infoSource}">${infoSource}</label></li>

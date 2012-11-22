@@ -62,12 +62,4 @@ public class MovieRetrieverBusinessManager implements
 	}
 
 
-	@Override
-	public void getFullMoviesResult(AtmosphereResource atmosphereResource,
-			MovieTO detailsRequest) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
 }
