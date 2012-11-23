@@ -43,7 +43,7 @@ public class LocaleAwareController {
 				String langCode = null;
 				boolean found=false;
 				try {
-					Pattern rex = Pattern.compile("^messages_([a-z]{2})\\.properties$");
+					Pattern rex = Pattern.compile("^messages_([a-z]{2})(?:[A-Z]{2})?\\.properties$");
 					Matcher matcher = rex.matcher(fileName);
 					found= matcher.find();
 					if (found) {
