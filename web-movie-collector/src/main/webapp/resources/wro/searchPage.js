@@ -208,11 +208,12 @@
 	//$('.tooltip-aware').tooltip();
 	
 }(jQuery));
-
 (function(e){function s(n){t||(t=e(e.message.defaults.template).appendTo(document.body),e(window).bind("mousemove click keypress",o)),t[n?"addClass":"removeClass"]("jquery-error")}function o(){t.is(":visible")&&!t.is(":animated")&&!n&&t.animate({opacity:0},e.message.defaults.fadeOutDuration,function(){e(this).hide()})}var t,n,r,i;e.fn.message=function(u,a){u=e.trim(u||this.text());if(!u)return;clearTimeout(r),clearTimeout(i),s(a),t.find("p").html(u),t.show().animate({opacity:e.message.defaults.opacity},e.message.defaults.fadeInDuration),n=!0,active=!1,r=setTimeout(function(){n=!1},e.message.defaults.minDuration+e.message.defaults.displayDurationPerCharacter*Math.sqrt(u.length)),i=setTimeout(o,e.message.defaults.totalTimeout)},e.message={},e.message.defaults={opacity:.8,fadeOutDuration:500,fadeInDuration:200,displayDurationPerCharacter:125,minDuration:2500,totalTimeout:6e3,template:'<div class="jquery-message"><div class="round"></div><p></p><div class="round"></div></div>'}})(jQuery);(function($, NS, SuperClass, SubClass) {
 	window[NS][SubClass] = window[NS][SubClass] || window[NS][SuperClass].extend({
 		$ctx: $('#searchPage'),
 		$msg: $('#searchPage .messages'),
+		$contentArea:$('.search-results','#searchPage'),
+		$accordion:null,
 		// used to store the data for the tooltip
 		dataArray : [],
 		// used to store the data for the detailed info of the movies
@@ -228,6 +229,7 @@
 		init : function(cfg) {
 			this.doLayout();
 			$("button.add",this.$ctx).on('click', $.proxy(this.srcMoviesAtm, this));
+			this.$accordion=this.$contentArea.accordion({heightStyle: "content", collapsible: true, active: false});
 		},
 		
 		/**Renders the page's dynamic layout*/
@@ -307,38 +309,64 @@
 	            if(response.state === "messageReceived"){
 	            	$.atmosphere.log('info', ["message received: " + response.state]);
 	            	if(response.responseBody!=="[]"){
-	            		var tooltipData = response.responseBody,
-	            		transform = {"tag":"ul","class":"accordionContent","children":[
-	                                  {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${title}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${year}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${director}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'<a class="accordion-movie-id" id=${id} href="#">${id}</a>'}
-						          ]};
-		            	$(searchItemTmpl.tmpl({
-							"label" : movieTitle,
-							"briefMovieData": movieTitle
-						})).appendTo(contentArea).accordion({heightStyle: "content", collapsible: true, active: false}).children('h1').attr('data-tooltipmsg', tooltipData);//.tooltip();
-		
+	            		var transform = {"tag":"ul","class":"accordionContent","children":[
+	                                    {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'${title}'},
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'${year}'},
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'${director}'},
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'<a class="accordion-movie-id" id=${id} href="#">${id}</a>'}
+						                ]},
+						    movieDataMapBySite = {},
+	   						briefMovieInfo = $.parseJSON(response.responseBody),
+	   						item = null, site = null,moviesArrayPerSite = null,
+	   						movieTitle = $('.movie-title',this.$ctx).val();
+	            		
+	            		contentArea.accordion("destroy");
+	            		$(searchItemTmpl.tmpl({
+							"label" : movieTitle
+						})).appendTo(contentArea);
+	            		contentArea.accordion({heightStyle: "content", collapsible: true, active: false});
+	            		
+	            		for (item in briefMovieInfo) {
+							 if(briefMovieInfo.hasOwnProperty(item)){
+								 site = briefMovieInfo[item].site;							 
+								 if(!(site in movieDataMapBySite)) {
+									 movieDataMapBySite[site] = [];
+								 }	
+								 moviesArrayPerSite = movieDataMapBySite[site];
+								 moviesArrayPerSite.push(briefMovieInfo[item]);
+							 }
+						 }
+													 
+						 for(item in movieDataMapBySite){
+							 if(movieDataMapBySite.hasOwnProperty(item)){
+								 $('#'+movieTitle).append("<div class=\"" + item + " site"+"\"/>");
+								 $('.'+item).append("<p class=\"tooltip-header\">" + item.toUpperCase() + "</p>");
+								 $('.'+item).json2html(movieDataMapBySite[item],transform);	 
+							 }
+						 }
+						 		
 						that.briefMovieInfo = response.responseBody;
-						$('#'+movieTitle).json2html($.parseJSON(tooltipData),transform);
-	            	}//end if(response.responseBody.length>0)
-	            	else{ //the response is empty
+	            	}else{ //the response is empty
 	            		$(searchItemTmpl.tmpl({
 							"label" : movieTitle + "(empty)"
-							//"briefMovieData": movieTitle
-						})).appendTo(contentArea).addClass("ui-state-disabled").accordion({heightStyle: "content",collapsible: true, active: false});
+						})).appendTo(contentArea).addClass("ui-state-disabled").accordion({heightStyle: "content", collapsible: true, active: false});
 	            	}
 	        	 }// end if(response.state==="messageReceived")
 	        }
 	        
 	        request.onMessage = function(response){
-	            buildTemplate(response);
+	            
+	        	buildTemplate(response);
+	            
 	            $('.search-term').on('click',function(){
-					console.log('attempted removal of search item');
-					 $(this).closest('div').remove();
+					console.log('removing the searched item');
+					var $contentDiv = $(this).parent().next('div');					
+					$(this).closest('h1').remove();
+					$contentDiv.remove();
 				});
-				$('.accordion-movie-id').on('click',function(){
+				
+	            $('.accordion-movie-id').on('click',function(){
 					$('.ui-layout-east').append($(this).closest('ul').html());
 				});
 	        };
@@ -412,36 +440,9 @@
 	            showDetailedMovieData(response);
 	        };
 	
-				window.alert('detailedData was requested');
-		        request = new $.atmosphere.AtmosphereRequest();
-		        request.transport = "websocket";
-		        request.url = 'http://localhost:8080/wmc/fullSrcMoviesAtm';
-		        request.contentType = "application/json";
-		        request.data = JSON.stringify(movieData);
-		        request.fallbackTransport = "long-polling";
-		        request.method = "POST";
-		        request.dataType = "text";
-		        //request.callback = buildTemplate;
-	        
-		        function showDetailedMovieData(response){
-		        	
-		            $.atmosphere.log('info', ["detailedResponse.state: " + response.state]);
-		            $.atmosphere.log('info', ["detailedResponse.transport: " + response.transport]);
-		            $.atmosphere.log('info', ["detailedResponse.responseBody: " + response.responseBody]);
-		            
-		            if(response.state === "messageReceived"){
-		            	$.atmosphere.log('info', ["detailed message received: " + response.state]);            					
-		        	}
-		        }
-	        
-		        request.onMessage = function(response){
-		            showDetailedMovieData(response);
-		        };
-		
-		        request.onMessagePublished = function(response){
-		
-		        };
-
+	        request.onMessagePublished = function(response){
+	        };
+	
 	        request.onOpen = function() { 
 	        	$.atmosphere.log('info', ['detailed data request socket open']); 
 	        };

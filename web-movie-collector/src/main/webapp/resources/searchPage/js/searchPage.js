@@ -2,6 +2,12 @@
 	window[NS][SubClass] = window[NS][SubClass] || window[NS][SuperClass].extend({
 		$ctx: $('#searchPage'),
 		$msg: $('#searchPage .messages'),
+		$contentArea:$('.search-results','#searchPage'),
+		$accordion : null,
+		$communicationChannel : null,
+		$socket : $.atmosphere,
+		$addButton : $("button.add",'#searchPage'),
+		$searchTerm : $("input.movie-title",'#searchPage'),
 		// used to store the data for the tooltip
 		dataArray : [],
 		// used to store the data for the detailed info of the movies
@@ -16,7 +22,102 @@
 		/** Constructor. */
 		init : function(cfg) {
 			this.doLayout();
-			$("button.add",this.$ctx).on('click', $.proxy(this.srcMoviesAtm, this));
+			this.$addButton.on('click', $.proxy(this.srcMoviesAtm, this));
+			this.$accordion=this.$contentArea.accordion({heightStyle: "content", collapsible: true, active: false});
+			this.handshake();
+		},
+		/**Initializes the communication channel between browser and server*/
+		handshake: function(){
+			request = new $.atmosphere.AtmosphereRequest();
+			request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
+			request.contentType = "application/json"; //send json to server
+			request.dataType = "text";//expect text from server
+			request.method = "POST";
+	        request.transport = "websocket";
+	        request.fallbackTransport = "long-polling";
+	        request.onOpen = this.channelOpened();
+	        request.onReconnect = this.channelReconnected();
+	        request.onError = this.channelError();
+	        request.onMessage = this.channelMessageReceived();
+	        
+		},
+		
+		/**called when communication channel has been opened*/
+		channelOpened : function(response){
+			this.$addButton.removeAttr('disabled');
+			$().message(this.$msg.data('searchpage.comm.ready'));
+			this.$searchTerm.focus();
+		},
+		
+		/**called when communication channel has been re-opened*/
+		channelReconnected : function(request,response){
+			$().message(this.$msg.data('searchpage.comm.reconnected'));
+		},
+		
+		/**called when error occured on communication channel*/
+		channelError : function(request,response){
+			$().message(this.$msg.data('searchpage.comm.error'),true);
+		},
+		
+		/**called when a message from the server has been received on communication channel*/
+		channelMessageReceived : function(response){
+			
+		},
+		
+		/**Builds up the markup for one search result*/
+		buildResultItem : function(response){
+	        	
+	            $.atmosphere.log('info', ["response.state: " + response.state]);
+	            $.atmosphere.log('info', ["response.transport: " + response.transport]);
+	            $.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
+	            
+	            if(response.state === "messageReceived"){
+	            	$.atmosphere.log('info', ["message received: " + response.state]);
+	            	if(response.responseBody!=="[]"){
+	            		var transform = {"tag":"ul","class":"accordionContent","children":[
+	                                    {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'${title}'},
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'${year}'},
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'${director}'},
+						                {'tag':'li', 'class':'accordion-movie-info', 'html':'<a class="accordion-movie-id" id=${id} href="#">${id}</a>'}
+						                ]},
+						    movieDataMapBySite = {},
+	   						briefMovieInfo = $.parseJSON(response.responseBody),
+	   						item = null, site = null,moviesArrayPerSite = null,
+	   						movieTitle = $('.movie-title',this.$ctx).val();
+	            		
+	            		contentArea.accordion("destroy");
+	            		$(searchItemTmpl.tmpl({
+							"label" : movieTitle
+						})).appendTo(contentArea);
+	            		contentArea.accordion({heightStyle: "content", collapsible: true, active: false});
+	            		
+	            		for (item in briefMovieInfo) {
+							 if(briefMovieInfo.hasOwnProperty(item)){
+								 site = briefMovieInfo[item].site;							 
+								 if(!(site in movieDataMapBySite)) {
+									 movieDataMapBySite[site] = [];
+								 }	
+								 moviesArrayPerSite = movieDataMapBySite[site];
+								 moviesArrayPerSite.push(briefMovieInfo[item]);
+							 }
+						 }
+													 
+						 for(item in movieDataMapBySite){
+							 if(movieDataMapBySite.hasOwnProperty(item)){
+								 $('#'+movieTitle).append("<div class=\"" + item + " site"+"\"/>");
+								 $('.'+item).append("<p class=\"tooltip-header\">" + item.toUpperCase() + "</p>");
+								 $('.'+item).json2html(movieDataMapBySite[item],transform);	 
+							 }
+						 }
+						 		
+						that.briefMovieInfo = response.responseBody;
+	            	}else{ //the response is empty
+	            		$(searchItemTmpl.tmpl({
+							"label" : movieTitle + "(empty)"
+						})).appendTo(contentArea).addClass("ui-state-disabled").accordion({heightStyle: "content", collapsible: true, active: false});
+	            	}
+	        	 }// end if(response.state==="messageReceived")	        
 		},
 		
 		/**Renders the page's dynamic layout*/
@@ -46,7 +147,6 @@
 		srcMoviesAtm: function(e) {
             
 			var that= this,
-				socket = $.atmosphere,
 				request = null,
 				subSocket = null,
 				$el = $(e.target), 
@@ -76,50 +176,10 @@
 				return false;
 			}
 	            
-	        request = new $.atmosphere.AtmosphereRequest();
-	        request.transport = "websocket";
-	        request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
-	        request.contentType = "application/json";
-	        request.data = JSON.stringify(movieData);
-	        $.atmosphere.log('info',["request.data:"+request.data]);
-	        request.fallbackTransport = "long-polling";
-	        request.method = "POST";
-	        request.dataType = "text";
+	        
 	        //request.callback = buildTemplate;
 	        
-	        function buildTemplate(response){
-	        	
-	            $.atmosphere.log('info', ["response.state: " + response.state]);
-	            $.atmosphere.log('info', ["response.transport: " + response.transport]);
-	            $.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
-	            
-	            if(response.state === "messageReceived"){
-	            	$.atmosphere.log('info', ["message received: " + response.state]);
-	            	if(response.responseBody!=="[]"){
-	            		var tooltipData = response.responseBody,
-	            		transform = {"tag":"ul","class":"accordionContent","children":[
-	                                  {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${title}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${year}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${director}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'<a class="accordion-movie-id" id=${id} href="#">${id}</a>'}
-						          ]};
-		            	$(searchItemTmpl.tmpl({
-							"label" : movieTitle,
-							"briefMovieData": movieTitle
-						})).appendTo(contentArea).accordion({heightStyle: "content", collapsible: true, active: false}).children('h1').attr('data-tooltipmsg', tooltipData);//.tooltip();
-		
-						that.briefMovieInfo = response.responseBody;
-						$('#'+movieTitle).json2html($.parseJSON(tooltipData),transform);
-	            	}//end if(response.responseBody.length>0)
-	            	else{ //the response is empty
-	            		$(searchItemTmpl.tmpl({
-							"label" : movieTitle + "(empty)"
-							//"briefMovieData": movieTitle
-						})).appendTo(contentArea).addClass("ui-state-disabled").accordion({heightStyle: "content",collapsible: true, active: false});
-	            	}
-	        	 }// end if(response.state==="messageReceived")
-	        }
+	        
 	        
 	        request.onMessage = function(response){
 	            
@@ -127,7 +187,9 @@
 	            
 	            $('.search-term').on('click',function(){
 					console.log('removing the searched item');
-					 $(this).closest('div').remove();
+					var $contentDiv = $(this).parent().next('div');					
+					$(this).closest('h1').remove();
+					$contentDiv.remove();
 				});
 				
 	            $('.accordion-movie-id').on('click',function(){
