@@ -1,6 +1,7 @@
 package ro.isdc.wmc.controller;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.atmosphere.cpr.AtmosphereResource;
@@ -22,6 +23,7 @@ import ro.isdc.wmc.controller.util.AtmosphereUtil;
 import ro.isdc.wmc.init.InfoSourceConfig;
 import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
+import ro.isdc.wmc.to.MovieInfoSource;
 import ro.isdc.wmc.utils.Utils;
  
 
@@ -72,13 +74,19 @@ public class WMCController extends LocaleAwareController{
 		System.out.println("proxy host: " + System.getProperty("http.proxyHost"));
 		System.out.println("proxy port: " + System.getProperty("http.proxyPort"));
 		AtmosphereUtil.suspend(atmosphereResource); 
+		
 		SearchInputModel reqSearch = Utils.getJsonAsObject(searchModelAsJson, SearchInputModel.class);
+		List<MovieInfoSource> infoSourcesList =  infoSourceConfig.getMoviesInfoSource(reqSearch);
+		if (reqSearch != null) {
+			
 		
 		try {
-			movieRetrieverBM.getBriefMoviesResult(atmosphereResource, reqSearch,  htmlNodePathMapper);
+			movieRetrieverBM.getBriefMoviesResult(atmosphereResource,reqSearch, infoSourcesList,  htmlNodePathMapper);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		}
+		
 		
 	}
 	

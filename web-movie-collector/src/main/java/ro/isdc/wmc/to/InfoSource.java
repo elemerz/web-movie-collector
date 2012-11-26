@@ -10,26 +10,28 @@ import java.util.Map;
  * @author Ioana.Mocan
  *
  */
-public class SiteConfigTO {
+public class InfoSource {
 
 	/**
 	 * Map containing the information for all sites.
 	 */
-	private Map<String, ConfigInfoSrcTO> configMap = new HashMap<String, ConfigInfoSrcTO>();
+	private Map<String, MovieInfoSource> configMap = new HashMap<String, MovieInfoSource>();
 
 	/**
 	 * @return the configMap
 	 */
-	public Map<String, ConfigInfoSrcTO> getConfigMap() {
+	public Map<String, MovieInfoSource> getConfigMap() {
 		return configMap;
 	}
 
 	/**
 	 * @param configMap the configMap to set
 	 */
-	public void setConfigMap(Map<String, ConfigInfoSrcTO> configMap) {
+	public void setConfigMap(Map<String, MovieInfoSource> configMap) {
 		this.configMap = configMap;
 	}
+	
+	
 	
 	
 }

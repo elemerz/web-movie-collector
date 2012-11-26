@@ -261,27 +261,27 @@
 				subSocket = null,
 				$el = $(e.target), 
 				movieData = {
-				"sites" : [],
-				"movies" : []
+				"searchTerms" : [],
+				"infoSourceKeys" : [] 
 				}, 
 				movieTitle = $('.movie-title',this.$ctx).val(), 
 				contentArea = $('.search-results',this.$ctx), 
 				searchItemTmpl = $('#searchItemTmpl').val();
 	
 			// map all the checked checkboxes' values into an array
-			movieData.sites = $('.info-sources :checked',this.$ctx).map(function() {
+			movieData.infoSourceKeys = $('.info-sources :checked',this.$ctx).map(function() {
 				return this.value;
 			}).get();
 			// put the search term into the movieData object
 			if($('.movie-title').val()!==""){
-				movieData.movies.push($('.movie-title').val());	
+				movieData.searchTerms.push($('.movie-title').val());	
 			}		
 	
-			if (movieData.sites.length === 0) {
+			if (movieData.infoSourceKeys.length === 0) {
 				$().message(this.$msg.data('searchpage.no.infosource.selected'),true);
 				return false;
 			}
-			if (movieData.movies.length === 0) {
+			if (movieData.searchTerms.length === 0) {
 				$().message(this.$msg.data('searchpage.movie.required'),true);
 				return false;
 			}
@@ -364,8 +364,8 @@
 				subSocket = null,
 				$el = $(e.target), 
 				movieData = {
-				"sites" : [],
-				"movies" : []
+				"infoSourceKeys" : [],
+				"searchTerms" : []
 				}, 
 				movieTitle = $('.movie-title',this.$ctx).val(), 
 				contentArea = $('.search-results',this.$ctx), 
@@ -430,24 +430,24 @@
 			var that= this,
 				$el = $(e.target), 
 				movieData = {
-				"sites" : [],
-				"movies" : []
+				"infoSourceKeys" : [],
+				"searchTerms" : []
 				}, 
 				movieTitle = $('.search-bar').val(), 
 				contentArea = $('#content-area'), 
 				searchItemTmpl = $('#searchItemTmpl').val();
 
 			// map all the checked checkboxes' values into an array
-			movieData.sites = $('input:checkbox:checked.sources').map(function() {
+			movieData.infoSourceKeys = $('input:checkbox:checked.sources').map(function() {
 				return this.value;
 			}).get();
-			if (movieData.sites.length === 0) {
+			if (movieData.infoSourceKeys.length === 0) {
 				$().message(that.$msg.data('searchpage.no.infosource.selected'),true);
 				return false;
 			}
 			// put the search term into the movieData object
-			movieData.movies.push($('.search-bar').val());
-			if (movieData.movies.length === 0) {
+			movieData.searchTerms.push($('.search-bar').val());
+			if (movieData.searchTerms.length === 0) {
 				$().message(that.$msg.data('searchpage.movie.required'),true);
 				return false;
 			}

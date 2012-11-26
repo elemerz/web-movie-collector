@@ -2,6 +2,8 @@ package ro.isdc.wmc.init;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.codehaus.jackson.JsonParseException;
@@ -10,7 +12,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ro.isdc.wmc.to.SiteConfigTO;
+import ro.isdc.wmc.model.SearchInputModel;
+import ro.isdc.wmc.to.InfoSource;
+import ro.isdc.wmc.to.MovieInfoSource;
 
 /**
  * Singleton class for obtaining the application's
@@ -32,7 +36,7 @@ public class InfoSourceConfig {
 	/**
 	 * Object containing the information for all sites.
 	 */
-	public SiteConfigTO siteConfig;
+	public InfoSource siteConfig;
 	
 	/**
 	 * Method for reading sites configuration file.
@@ -42,7 +46,7 @@ public class InfoSourceConfig {
 		String movieConfig = streamToString(inputStream);
 		final ObjectMapper mapper = new ObjectMapper();
 		try {
-			this.setSiteConfig(mapper.readValue(movieConfig, SiteConfigTO.class));
+			this.setSiteConfig(mapper.readValue(movieConfig, InfoSource.class));
 		} catch (JsonParseException e) {
 			logger.error("Cannot parse json file.", e);
 			e.printStackTrace();
@@ -88,15 +92,29 @@ public class InfoSourceConfig {
 	/**
 	 * @return the siteConfig
 	 */
-	public SiteConfigTO getSiteConfig() {
+	public InfoSource getSiteConfig() {
 		return siteConfig;
 	}
 
 	/**
 	 * @param siteConfig the siteConfig to set
 	 */
-	public void setSiteConfig(SiteConfigTO siteConfig) {
+	public void setSiteConfig(InfoSource siteConfig) {
 		this.siteConfig = siteConfig;
+	}
+	
+	public  List<MovieInfoSource> getMoviesInfoSource(SearchInputModel searchModel) {
+		
+		List<MovieInfoSource> movieInfoSourcesList  = new ArrayList<MovieInfoSource>();
+		
+		for (String infoSourceKey : searchModel.getInfoSourceKeys()) {
+			
+			movieInfoSourcesList.add(getSiteConfig().getConfigMap().get(infoSourceKey));
+			
+		}
+		
+		return movieInfoSourcesList;
+		
 	}
 	
 }
