@@ -288,7 +288,7 @@
 	            
 	        request = new $.atmosphere.AtmosphereRequest();
 	        request.transport = "websocket";
-	        request.url = 'http://localhost:8080/wmc/srcMoviesAtm';
+	        request.url = 'searchMovies';
 	        request.contentType = "application/json";
 	        request.data = JSON.stringify(movieData);
 	        $.atmosphere.log('info',["request.data:"+request.data]);

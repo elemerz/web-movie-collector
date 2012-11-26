@@ -8,7 +8,7 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<servlet>
-		<servlet-name>feeds</servlet-name>
+		<servlet-name>async</servlet-name>
 		<servlet-class>org.atmosphere.cpr.MeteorServlet</servlet-class>
 		<init-param>
 			<param-name>org.atmosphere.servlet</param-name>
@@ -26,7 +26,7 @@
 		<async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>feeds</servlet-name>
+		<servlet-name>async</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 </web-app>
