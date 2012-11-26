@@ -262,7 +262,7 @@
 				$el = $(e.target), 
 				movieData = {
 				"searchTerms" : [],
-				"infoSourceKeys" : [] 
+				"infoSourceKeys" : []
 				}, 
 				movieTitle = $('.movie-title',this.$ctx).val(), 
 				contentArea = $('.search-results',this.$ctx), 
