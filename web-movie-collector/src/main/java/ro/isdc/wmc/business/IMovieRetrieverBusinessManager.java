@@ -1,11 +1,14 @@
 
 package ro.isdc.wmc.business;
 
+import java.util.List;
+
 import org.apache.http.nio.reactor.IOReactorException;
 import org.atmosphere.cpr.AtmosphereResource;
 
 import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
+import ro.isdc.wmc.to.MovieInfoSource;
 import ro.isdc.wmc.to.MovieTO;
 
 /**
@@ -27,7 +30,7 @@ public interface IMovieRetrieverBusinessManager {
 	 * @throws IOReactorException
 	 * @throws InterruptedException
 	 */
-	void getBriefMoviesResult(AtmosphereResource atmosphereResource, SearchInputModel reqSearch,  HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException, InterruptedException;
+	void getBriefMoviesResult(AtmosphereResource atmosphereResource,SearchInputModel reqSearch,  List<MovieInfoSource> infoSources,  HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException, InterruptedException;
 
 	/**
 	 * Method for retrieving full information about one movie.

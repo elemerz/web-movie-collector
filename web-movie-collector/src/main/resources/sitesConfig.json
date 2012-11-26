@@ -5,7 +5,7 @@
     "fullSearchURL":"http://http://www.imdb.com/title/{movieId}/",
     "briefSearchMethod":"get",
     "fullSearchMethod": "get",
-    "briefPostData":{},
+     "post":{},
     "fullPostData":{},
     "filmSheetPageIdentifier":"<CSS3 selector|XPathSelector|Substring>",
     "filmListPageIdentifier":"<CSS3 selector|XPathSelector|Substring>"
@@ -15,13 +15,22 @@
     "fullSearchURL":"http://www.filmkatalogus.hu/{movieId}",
     "briefSearchMethod": "post",
     "fullSearchMethod": "get",
-    "briefPostData": {
-       "gyorskeres":"0",
-       "keres0":"1",
-       "sbmt":"Keress!",
-       "szo0":"{title}"
+    "post":{
+	    "usesCookies": true,
+	    "fetchCookieURL": "http://www.filmkatalogus.hu",
+	    "briefPostBody": {
+	       "gyorskeres":"0",
+	       "keres0":"1",
+	       "sbmt":"Keress!",
+	       "szo0":"{title}"
+	    },
+	    "briefPostHeaders": {
+	    "User-Agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11",
+	    "cookies":" ${xr}; ${PHPSESSID}; ${_sessionid};"
+	    }
     },
+    
     "fullPostData":{}
-  }
+ 	 }
   }
 }

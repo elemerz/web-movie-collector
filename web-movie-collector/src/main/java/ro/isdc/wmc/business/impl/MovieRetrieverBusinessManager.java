@@ -13,6 +13,7 @@ import ro.isdc.wmc.business.MovieRetriever;
 import ro.isdc.wmc.init.InfoSourceConfig;
 import ro.isdc.wmc.model.HtmlNodePathMapper;
 import ro.isdc.wmc.model.SearchInputModel;
+import ro.isdc.wmc.to.MovieInfoSource;
 import ro.isdc.wmc.to.MovieTO;
 import ro.isdc.wmc.utils.Utils;
 
@@ -25,13 +26,11 @@ public class MovieRetrieverBusinessManager implements
 	@Autowired
 	private MovieRetriever retriever;
 	@Override
-	public void getBriefMoviesResult(AtmosphereResource atmosphereResource,
-			SearchInputModel reqSearch,  HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
+	public void getBriefMoviesResult(AtmosphereResource atmosphereResource, SearchInputModel reqSearch,
+			List<MovieInfoSource> infoSources,  HtmlNodePathMapper  htmlNodePathMapper) throws IOReactorException,
 			InterruptedException {
-		final List<HttpUriRequest> requests = Utils.getURLs(getConfigApp()
-				.getSiteConfig(), reqSearch);
 
-		retriever.execute(requests, atmosphereResource, htmlNodePathMapper);
+		retriever.execute(reqSearch, infoSources, atmosphereResource, htmlNodePathMapper);
 
 	}
 

@@ -1,8 +1,6 @@
 package ro.isdc.wmc.to;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Object containing the common data for each site.
@@ -10,7 +8,8 @@ import java.util.Map.Entry;
  * @author Ioana.Mocan
  *
  */
-public class ConfigInfoSrcTO {
+//TODO: RENAME TO MovieInfoSource
+public class MovieInfoSource {
 	
 	/**
 	 * The url for the site.
@@ -42,14 +41,13 @@ public class ConfigInfoSrcTO {
 	 */
 	private String filmListPageIdentifier;
 	
-	/**
-	 * Map containing the data for the POST method.
-	 */
-	private Map<String, String> briefPostData;
+	
+	private MovieInfoPostData post;
 	
 	/**
 	 * Map containing the data for the POST method for full movie details.
 	 */
+	//TODO: change this to be like post data for brief. See above Map<String, ConfigInfoSrcPostTO> post 
 	private Map<String, String> fullPostData;
 
 	
@@ -153,47 +151,19 @@ public class ConfigInfoSrcTO {
 	}
 
 	/**
-	 * @return the briefPostData
+	 * @return the post
 	 */
-	public Map<String, String> getBriefPostData() {
-		return briefPostData;
+	public MovieInfoPostData getPost() {
+		return post;
 	}
 
 	/**
-	 * @param briefPostData the briefPostData to set
+	 * @param post the post to set
 	 */
-	public void setBriefPostData(Map<String, String> briefPostData) {
-		this.briefPostData = briefPostData;
+	public void setPost(MovieInfoPostData post) {
+		this.post = post;
 	}
 
-	/*Returns a String representation of the ConfigInfoSrcTO Object 
-	 * 
-	 */
-	@Override
-	public String toString() {
-		String result = new String();
-		
-		result = "\n\n SEARCH URL: " + this.getBriefSearchURL() + "\n" 
-				+ "SEARCH METHOD: " + this.getBriefSearchMethod() + "\n";
-		if (this.getBriefSearchMethod().equalsIgnoreCase("post")) {
-			
-			Map<String, String> postMap = this.getBriefPostData();
-			Iterator<Entry<String, String>> postIt = postMap.entrySet().iterator();
-			
-			while(postIt.hasNext()) {
-				result += "\n Post data params are: ";
-				Entry<String, String> pairsPost = postIt.next();
-				
-				result += pairsPost.getKey() + ": " + pairsPost.getValue() +"\n";
-			}
-		}
-		else if (this.getBriefSearchMethod().equalsIgnoreCase("get")) {
-			result += "SHEET PAGE ID: " + this.getFilmSheetPageIdentifier() + "\n"
-					+ "LIST PAGE ID: " + this.getFilmListPageIdentifier();
-		}
-		return result;
-	}
-	
 	
 
 }
