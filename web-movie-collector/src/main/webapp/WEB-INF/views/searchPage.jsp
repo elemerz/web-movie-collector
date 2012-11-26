@@ -1,11 +1,11 @@
 <%@include file="/WEB-INF/views/pageIncludes.jsp"%>
-<header class="main ui-layout-north ui-helper-clearfix">
-	<h2 class="left"><spring:message code="searchPage.title"/></h2>
+<header id="header" class="main ui-layout-north ui-helper-clearfix">
+	<h2 id="title" class="left"><spring:message code="searchPage.title"/></h2>
 	<div class="right">
 		<%@include file="/WEB-INF/views/localeChanger.jsp"%>
 	</div>	
 </header>
-<section class="ui-layout-center layout-inner">
+<section id="main-section" class="ui-layout-center layout-inner">
  <header class="ui-layout-north user-input-zone">
  	<label for="movieTitle" class="ui-layout-west"><spring:message code="searchPage.movie.title"/></label>
  	<div class="ui-layout-center inputs ui-helper-clearfix">
