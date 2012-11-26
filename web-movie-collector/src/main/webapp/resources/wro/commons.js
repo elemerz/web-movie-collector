@@ -15427,7 +15427,7 @@ jQuery.atmosphere=function(){jQuery(window).unload(function(){jQuery.atmosphere.
 		},
 		/** Constructor. */
 		init : function(cfg) {
-			window.setTimeout(this.buildMenu,1000);
+			this.buildMenu();
 		},
 		buildMenu:function(){
 			$( "#rerun" )
