@@ -10,7 +10,12 @@
 	    </select>
 	    --%>
 		    <c:forEach var="lng" items="${supportedLanguages}" varStatus="status">
-	        	<a class="locale ${lng}" href="?lang=${lng}"><spring:message code="localeChanger.${lng}"/></a>
+	        	<c:if test="${currentLanguage eq lng}">
+		        	<label class="locale ${lng} current-lng"><spring:message code="localeChanger.${lng}"/></label>
+	        	</c:if>
+	        	<c:if test="${currentLanguage ne lng}">
+		        	<a class="locale ${lng}" href="?lang=${lng}"><spring:message code="localeChanger.${lng}"/></a>
+	        	</c:if>
 		    </c:forEach>
 	</div>
 </span>

@@ -47,3 +47,7 @@
 .locale-changer .tr{ background-position: 0 -2960px;} /*Turkey*/ 
 .locale-changer .uk{ background-position: 0 -3034px;} /*Ukraine*/ 
 .locale-changer .vi{ background-position: 0 -3108px;} /*Vietnam*/ 
+
+.locale-changer label.current-lng{
+	border:2px inset #aaa;
+} 

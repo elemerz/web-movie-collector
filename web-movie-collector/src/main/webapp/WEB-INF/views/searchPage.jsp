@@ -17,8 +17,13 @@
  	<li>Movie titles here</li>
  </ul>
  <ul class="info-sources ui-layout-south ui-helper-clearfix">
-	<c:forEach var="infoSource" items="${infoSources}">
-		<li class="info-source"><input type="checkbox" id="${infoSource}" value="${infoSource}" /><label for="${infoSource}">${infoSource}</label></li>
+	<c:forEach var="infoSource" items="${infoSources}" varStatus="status">
+		<c:if test="${status.first}">
+			<li class="info-source"><input type="checkbox" checked="checked" id="${infoSource}" value="${infoSource}" /><label for="${infoSource}">${infoSource}</label></li>
+		</c:if>
+		<c:if test="${not status.first}">
+			<li class="info-source"><input type="checkbox" id="${infoSource}" value="${infoSource}" /><label for="${infoSource}">${infoSource}</label></li>
+		</c:if>
 	</c:forEach>
  </ul>
  <aside class="ui-layout-east">Movie Details Zone</aside>	

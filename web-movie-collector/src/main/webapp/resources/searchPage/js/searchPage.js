@@ -2,6 +2,13 @@
 	window[NS][SubClass] = window[NS][SubClass] || window[NS][SuperClass].extend({
 		$ctx: $('#searchPage'),
 		$msg: $('#searchPage .messages'),
+		$contentArea:$('.search-results','#searchPage'),
+		$accordion : null,
+		$communicationChannel : null,
+		$socket : $.atmosphere,
+		$initialRequest : 0,
+		$addButton : $("button.add",'#searchPage'),
+		$searchTerm : $("input.movie-title",'#searchPage'),
 		// used to store the data for the tooltip
 		dataArray : [],
 		// used to store the data for the detailed info of the movies
@@ -16,7 +23,129 @@
 		/** Constructor. */
 		init : function(cfg) {
 			this.doLayout();
-			$("button.add",this.$ctx).on('click', $.proxy(this.srcMoviesAtm, this));
+			this.handshake();
+			this.$addButton.on('click', $.proxy(this.processRequest, this));
+			this.$accordion=this.$contentArea.accordion({heightStyle: "content", collapsible: true, active: false});			
+		},
+		/**Initializes the communication channel between browser and server*/
+		handshake: function(){
+			var $request = new $.atmosphere.AtmosphereRequest(), that=this;
+			$request.url = 'http://'+document.location.host+'/wmc/searchMovies';
+			$request.contentType = "application/json"; //send json to server
+			$request.dataType = "text";//expect text from server
+			$request.method = "POST";
+	        $request.transport = "websocket";
+	        $request.fallbackTransport = "long-polling";	    
+	        $request.onOpen = $.proxy(this.channelOpened, this);
+	        $request.onReconnect = this.channelReconnected;
+	        $request.onError = this.channelError;
+	        $request.onMessage = this.messageReceived;
+			
+	        this.$communicationChannel = this.$socket.subscribe($request);
+		},
+		/**
+		 * On Message received (from server) event callback
+		 * @param response
+		 */
+		messageReceived: function(response){
+		    console.log(response.responseBody);
+        	/*$.proxy(this.buildTemplate, this);	            
+            $('.search-term').on('click',function(){
+				console.log('removing the searched item');
+				var $contentDiv = $(this).parent().next('div');					
+				$(this).closest('h1').remove();
+				$contentDiv.remove();
+			});
+			
+            $('.accordion-movie-id').on('click',function(){
+				$('.ui-layout-east').append($(this).closest('ul').html());
+			});*/
+		},
+		/**Called when communication channel has been opened*/
+		channelOpened : function(response){
+			this.$addButton.removeAttr('disabled');
+			$().message(this.$msg.data('searchpage.comm.ready'));
+			this.$searchTerm.focus();
+		},
+		
+		/**Called when communication channel has been re-opened*/
+		channelReconnected : function(request,response){
+			$().message(this.$msg.data('searchpage.comm.reconnected'));
+		},
+		
+		/**Called when error occured on communication channel*/
+		channelError : function(request,response){
+			$().message(this.$msg.data('searchpage.comm.error'),true);
+		},
+		
+		/**Called when a message from the server has been received on communication channel*/
+		
+		/**Sends a request to server and then*/
+		processRequest: function(e){
+			var that= this,
+			$el = $(e.target), 
+			movieData = {
+			"searchTerms" : [],
+			"infoSourceKeys" : []
+			}, 
+			movieTitle = $('.movie-title',this.$ctx).val(), 
+			contentArea = $('.search-results',this.$ctx), 
+			searchItemTmpl = $('#searchItemTmpl').val();						
+	
+			// map all the checked checkboxes' values into an array
+			movieData.infoSourceKeys = $('.info-sources :checked',this.$ctx).map(function() {
+				return this.value;
+			}).get();
+			// put the search term into the movieData object
+			if($('.movie-title').val()!==""){
+				movieData.searchTerms.push($('.movie-title').val());	
+			}		
+	
+			if (movieData.infoSourceKeys.length === 0) {
+				$().message(this.$msg.data('searchpage.no.infosource.selected'),true);
+				return false;
+			}
+			if (movieData.searchTerms.length === 0) {
+				$().message(this.$msg.data('searchpage.movie.required'),true);
+				return false;
+			}
+	        console.log(JSON.stringify(movieData));    
+	        	        		
+        	this.$communicationChannel.push(JSON.stringify(movieData));		       
+		},
+		
+		/**Builds up the markup for one search result*/
+		buildTemplate : function(response){
+	        var contentArea = $('.search-results',this.$ctx),
+	        	searchItemTmpl = $('#searchItemTmpl').val(),
+				movieDataSourceTmpl = $('#movieDataSourceTmpl').val(),
+				movieItemTmpl = $('#movieItemTmpl').val(),
+				briefMovieInfo = null;						
+
+			if(response.state === "messageReceived"){	            	
+            	if(response.responseBody!=="[]"){
+            		briefMovieInfo = $.parseJSON(response.responseBody);
+            			            		
+            		$.each(briefMovieInfo,function(key,value){
+            			console.log(key+" "+value);
+            			
+            			$(movieDataSourceTmpl.tmpl({
+							"movieDataSource" : key
+						})).appendTo("#searchItemTmpl");
+            			
+            			$.each(value, function(){
+            				$(movieItemTmpl.tmpl({
+								"movieItemData" : value
+							})).appendTo(movieDataSourceTmpl);
+            			});
+            		});
+            		            		
+            	}else{ //the response is empty
+	            		$(searchItemTmpl.tmpl({
+							"label" : movieTitle + "(empty)"
+						})).appendTo(contentArea).addClass("ui-state-disabled").accordion({heightStyle: "content", collapsible: true, active: false});
+	            }
+	        }// end if(response.state==="messageReceived")	        
 		},
 		
 		/**Renders the page's dynamic layout*/
@@ -41,307 +170,14 @@
 			}));
 			$('.user-input-zone').layout(cfgLayout);
 		},
-		
-		/***/
-		srcMoviesAtm: function(e) {
-            
-			var that= this,
-				socket = $.atmosphere,
-				request = null,
-				subSocket = null,
-				$el = $(e.target), 
-				movieData = {
-				"searchTerms" : [],
-				"infoSourceKeys" : []
-				}, 
-				movieTitle = $('.movie-title',this.$ctx).val(), 
-				contentArea = $('.search-results',this.$ctx), 
-				searchItemTmpl = $('#searchItemTmpl').val();
-	
-			// map all the checked checkboxes' values into an array
-			movieData.infoSourceKeys = $('.info-sources :checked',this.$ctx).map(function() {
-				return this.value;
-			}).get();
-			// put the search term into the movieData object
-			if($('.movie-title').val()!==""){
-				movieData.searchTerms.push($('.movie-title').val());	
-			}		
-	
-			if (movieData.infoSourceKeys.length === 0) {
-				$().message(this.$msg.data('searchpage.no.infosource.selected'),true);
-				return false;
-			}
-			if (movieData.searchTerms.length === 0) {
-				$().message(this.$msg.data('searchpage.movie.required'),true);
-				return false;
-			}
-	            
-	        request = new $.atmosphere.AtmosphereRequest();
-	        request.transport = "websocket";
-	        request.url = 'searchMovies';
-	        request.contentType = "application/json";
-	        request.data = JSON.stringify(movieData);
-	        $.atmosphere.log('info',["request.data:"+request.data]);
-	        request.fallbackTransport = "long-polling";
-	        request.method = "POST";
-	        request.dataType = "text";
-	        //request.callback = buildTemplate;
-	        
-	        function buildTemplate(response){
-	        	
-	            $.atmosphere.log('info', ["response.state: " + response.state]);
-	            $.atmosphere.log('info', ["response.transport: " + response.transport]);
-	            $.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
-	            
-	            if(response.state === "messageReceived"){
-	            	$.atmosphere.log('info', ["message received: " + response.state]);
-	            	if(response.responseBody!=="[]"){
-	            		var tooltipData = response.responseBody,
-	            		transform = {"tag":"ul","class":"accordionContent","children":[
-	                                  {'tag':'li','class':'delimiter', 'html':''},   							                                                                  
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${title}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${year}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'${director}'},
-						              {'tag':'li', 'class':'accordion-movie-info', 'html':'<a class="accordion-movie-id" id=${id} href="#">${id}</a>'}
-						          ]};
-		            	$(searchItemTmpl.tmpl({
-							"label" : movieTitle,
-							"briefMovieData": movieTitle
-						})).appendTo(contentArea).accordion({heightStyle: "content", collapsible: true, active: false}).children('h1').attr('data-tooltipmsg', tooltipData);//.tooltip();
-		
-						that.briefMovieInfo = response.responseBody;
-						$('#'+movieTitle).json2html($.parseJSON(tooltipData),transform);
-	            	}//end if(response.responseBody.length>0)
-	            	else{ //the response is empty
-	            		$(searchItemTmpl.tmpl({
-							"label" : movieTitle + "(empty)"
-							//"briefMovieData": movieTitle
-						})).appendTo(contentArea).addClass("ui-state-disabled").accordion({heightStyle: "content",collapsible: true, active: false});
-	            	}
-	        	 }// end if(response.state==="messageReceived")
-	        }
-	        
-	        request.onMessage = function(response){
-	            
-	        	buildTemplate(response);
-	            
-	            $('.search-term').on('click',function(){
-					console.log('removing the searched item');
-					 $(this).closest('div').remove();
-				});
-				
-	            $('.accordion-movie-id').on('click',function(){
-					$('.ui-layout-east').append($(this).closest('ul').html());
-				});
-	        };
-	
-	        request.onMessagePublished = function(response){
-	
-	        };
-	
-	        request.onOpen = function() { 
-	        	$.atmosphere.log('info', ['socket open']); 	        	
-	        };
-	        request.onError =  function() { $().message(that.$msg.data('searchpage.server.error'),true);$.atmosphere.log('info', ['socket error']); };
-	        request.onReconnect =  function() { $.atmosphere.log('info', ['socket reconnect']); };
-	
-	        subSocket = socket.subscribe(request);
-        },
-        showDetailedData: function(e) {            
-			var that= this,
-				socket = $.atmosphere,
-				request = null,
-				subSocket = null,
-				$el = $(e.target), 
-				movieData = {
-				"infoSourceKeys" : [],
-				"searchTerms" : []
-				}, 
-				movieTitle = $('.movie-title',this.$ctx).val(), 
-				contentArea = $('.search-results',this.$ctx), 
-				searchItemTmpl = $('#searchItemTmpl').val();
-
-			window.alert('detailedData was requested');
-	        request = new $.atmosphere.AtmosphereRequest();
-	        request.transport = "websocket";
-	        request.url = 'http://localhost:8080/wmc/fullSrcMoviesAtm';
-	        request.contentType = "application/json";
-	        request.data = JSON.stringify(movieData);
-	        request.fallbackTransport = "long-polling";
-	        request.method = "POST";
-	        request.dataType = "text";
-	        //request.callback = buildTemplate;
-        
-	        function showDetailedMovieData(response){
-	        	
-	            $.atmosphere.log('info', ["detailedResponse.state: " + response.state]);
-	            $.atmosphere.log('info', ["detailedResponse.transport: " + response.transport]);
-	            $.atmosphere.log('info', ["detailedResponse.responseBody: " + response.responseBody]);
-	            
-	            if(response.state === "messageReceived"){
-	            	$.atmosphere.log('info', ["detailed message received: " + response.state]);  
-	            	var detailedData = JSON.stringify([
-                          {
-                              "title": "Batman",
-                              "year": "2008",
-                              "site": "imdb",
-                              "id": "109101",
-                              "director": "C.Nolan"
-                          },
-                          {
-                              "title": "Batman2",
-                              "year": "2009",
-                              "site": "filmkatalogus",
-                              "id": "109102",
-                              "director": "Chr.Nolan"
-                          }
-                      ]);
-	 				$('.ui-layout-east').append('<div>'+detailedData+'</div');
-	        	}
-	        }
-        
-	        request.onMessage = function(response){
-	            showDetailedMovieData(response);
-	        };
-	
-	        request.onMessagePublished = function(response){
-	        };
-	
-	        request.onOpen = function() { 
-	        	$.atmosphere.log('info', ['detailed data request socket open']); 
-	        };
-	        request.onError =  function() { $().message(that.$msg.data('searchpage.server.error'),true);$.atmosphere.log('info', ['socket error']); };
-	        request.onReconnect =  function() { $.atmosphere.log('info', ['socket reconnect']); };
-	
-	        subSocket = socket.subscribe(request);
-        },
-		/** On click event handler for Add Item button */
-		addSearchItem : function(e) {
-			var that= this,
-				$el = $(e.target), 
-				movieData = {
-				"infoSourceKeys" : [],
-				"searchTerms" : []
-				}, 
-				movieTitle = $('.search-bar').val(), 
-				contentArea = $('#content-area'), 
-				searchItemTmpl = $('#searchItemTmpl').val();
-
-			// map all the checked checkboxes' values into an array
-			movieData.infoSourceKeys = $('input:checkbox:checked.sources').map(function() {
-				return this.value;
-			}).get();
-			if (movieData.infoSourceKeys.length === 0) {
-				$().message(that.$msg.data('searchpage.no.infosource.selected'),true);
-				return false;
-			}
-			// put the search term into the movieData object
-			movieData.searchTerms.push($('.search-bar').val());
-			if (movieData.searchTerms.length === 0) {
-				$().message(that.$msg.data('searchpage.movie.required'),true);
-				return false;
-			}
-			// stringify the movieData object
-//			searchData = JSON.stringify(movieData);
-		
-			// do the ajax call to retrieve the results
-			$.ajax({
-				url : 'http://localhost:8080/wmc/searchmovies',
-				data : JSON.stringify(movieData),
-				type : "POST",
-				contentType : 'application/json; charset=utf-8',
-				dataType : 'json',
-				success : function(response) {
-					console.log('success' ,response.basicMoviesArray);
-					$(searchItemTmpl.tmpl({
-						"label" : movieTitle,
-						"searchResult": response.basicMoviesArray
-					})).tooltip().appendTo(contentArea).find('.search-term').click($.proxy(this.removeSearchItem, this));
-
-					that.briefMovieInfo = response.basicMoviesArray;
-				},
-				error : function(err, req, stat) {
-					$().message(req + 'stat:' + stat,true);
-				}
-			});
-		},
-		/** Removes the clicked search item */
-		removeSearchItem : function(e) {
-			console.log('in removeSearchItem');
-			$(e.target).closest('div').remove();
-		},
-		/** Loads basic movie data into the tooltip */
-		getTooltipData : function(title, source) {
-			var addr = title + '/' + source,
-			// used to store the data for the tooltip
-				dataArray = [],
-			// used to store the data for the detailed info of the movies
-				dataObject = {},
-
-				xhr = $.ajax({
-				url : 'http://localhost/' + addr,
-				data : '{}',
-				type : "POST",
-				contentType : 'application/json; charset=utf-8',
-				dataType : 'json',
-				success : function(response) {
-					if (response.length > 0) {
-						for ( var i = 0; i < response.length; i++) {
-							dataObject.id = response[i].id;
-							dataObject.title = response[i].title;
-							dataObject.year = response[i].year;
-							dataObject.director = response[i].director;
-							dataObject.site = response[i].site;
-							dataArray.push(dataObject);
-						}
-					}
-				},
-				error : function(err, req, stat) {
-					$().message(err);
-				}
-			});
-
-			return dataArray;
-
-		},
-
-		/** Loads verbose movie data into the tooltip */
-		getDetailedData : function(title, source, id) {
-			var addr = title + '/' + source + '/' + id,
-				dataObject = {},
-
-				xhr = $.ajax({
-				url : 'http://localhost/' + addr,
-				data : '{}',
-				type : "POST",
-				contentType : 'application/json; charset=utf-8',
-				dataType : 'json',
-				success : function(response) {
-					if (response.length > 0) {
-						for ( var i = 0; i < response.length; i++) {
-							dataObject.id = response[i].id;
-							dataObject.title = response[i].title;
-							dataObject.year = response[i].year;
-							dataObject.description = response[i].description;
-							dataObject.director = response[i].director;
-							dataObject.site = response[i].site;
-							dataObject.rate = response[i].rate;
-							dataObject.cast = response[i].cast;
-							dataObject.genre = response[i].genre;
-							dataObject.runtime = response[i].runtime;
-						}
-					}
-				},
-				error : function(err, req, stat) {
-					$().message(err);
-				}
-			});
-			return dataObject;
-		}
+			
+	    showDetailedData: function(e) {            
+			console.log('To be implemented');
+        }		
 	});
 
 	/* Attach page specific behavior on page load */
 	$(function() {
 		return new window[NS][SubClass]();
 	});
-}(window.jQuery, "WMC", "Base", "SearchPage"));
+}(window.jQuery, "WMC", "Base", "SearchPage")); 

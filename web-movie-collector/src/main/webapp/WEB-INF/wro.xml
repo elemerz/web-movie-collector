@@ -21,6 +21,7 @@
     <js>/resources/jquery/ui/layout/js/jquery.layout-latest.min.js</js>
     <js>/resources/jquery/json2html/js/jquery.json2html-3.1.js</js>
     <js>/resources/jquery/atmosphere/js/jquery.atmosphere-1.0.min.js</js>
+    <js>/resources/jquery/tooltip/js/jQuery.tooltip.customized-0.1.min.js</js>
     <js>/resources/common/js/base.js</js>
     <js>/resources/localeChanger/js/localeChanger.js</js>
   </group>
@@ -31,7 +32,6 @@
     <css>/resources/jquery/message/css/jquery.message-1.0.customizations.css</css>
     <css>/resources/searchPage/css/searchPage.css</css>
     <css>/resources/localeChanger/css/localeChanger.css</css>
-    <js>/resources/jquery/tooltip/js/tooltip.customized-0.1.js</js>
     <js>/resources/jquery/message/js/jquery.message-1.0.min.js</js>
     <js>/resources/searchPage/js/searchPage.js</js>
   </group>

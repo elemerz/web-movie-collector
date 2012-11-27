@@ -4,45 +4,40 @@ package ro.isdc.wmc.controller;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
-import ro.isdc.wmc.controller.util.Constants;
-
 public class LocaleAwareController {
+	private static List<String> supportedLanguages= new ArrayList<String>();
 	public LocaleAwareController() {
 	}
 	
 	@ModelAttribute("supportedLanguages")
-	public List<String> getCurrentLocale(final HttpServletRequest request,final String lang){
+	public List<String> getCurrentLocale(final HttpServletRequest request,final String lang, final Model model){
 		String userLang=lang;
 		if(userLang == null || userLang.trim().length() ==0){
 			userLang=Locale.getDefault().getLanguage();
 		}
 		Locale locale = new Locale(userLang.trim().toUpperCase());
 		request.setAttribute(CookieLocaleResolver.LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
-		return getSupportedLanguages(request);
+		model.addAttribute("currentLanguage",userLang);
+		return LocaleAwareController.supportedLanguages;
 	}
 
-	private List<String> getSupportedLanguages(HttpServletRequest request) {
-		HttpSession session = request.getSession();
-		if(session == null || session.getServletContext() == null || session.getServletContext().getRealPath("") == null){
-			return Arrays.asList(new String[]{Locale.getDefault().getLanguage()});
-		}
-		String webappRoot=session.getServletContext().getRealPath("/WEB-INF/classes/");
+	public static void loadSupportedLanguages(ServletContext ctx, String languageFolder) {
+		String webappRoot=ctx.getRealPath(languageFolder);
 		System.out.println(webappRoot);
 		File classPathFolder= new File(webappRoot);
-		final List<String> languages= new ArrayList<String>();
 		classPathFolder.list(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String fileName) {
@@ -54,7 +49,7 @@ public class LocaleAwareController {
 					found= matcher.find();
 					if (found) {
 						langCode = matcher.group(1);
-						languages.add(langCode);
+						LocaleAwareController.supportedLanguages.add(langCode);
 					} 
 				} catch (PatternSyntaxException ex) {
 					found=false;
@@ -62,7 +57,6 @@ public class LocaleAwareController {
 				return found;
 			}
 		});		
-		return languages;
 	}
 	
 }
