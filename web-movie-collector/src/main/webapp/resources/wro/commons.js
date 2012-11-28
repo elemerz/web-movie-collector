@@ -15005,327 +15005,324 @@ b){return(100*(parseInt(a,10)/parseInt(b,10))).toFixed()}var d=window,c=screen,g
 //  THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
 //  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+(function($) {
 
-(function($){	
-
-	//Main method
-	$.fn.json2html = function(JSON, transform, options){	
+	// Main method
+	$.fn.json2html = function(JSON, transform, options) {
 
 		var JSONObject;
 		var type = jQuery.type(JSON);
 
-		//Convert the string to a json object
-		switch( type ) {
-			case 'string':
-				JSONObject = jQuery.parseJSON(JSON);
+		// Convert the string to a json object
+		switch (type) {
+		case 'string':
+			JSONObject = jQuery.parseJSON(JSON);
 			break;
 
-			default:
-				JSONObject = JSON;
+		default:
+			JSONObject = JSON;
 			break;
 
 		}
-		
-		//Extend the options (with defaults)
-		if( options != undefined ) $.extend($.json2html.options, options);
-		
-		//Make sure to take care of any chaining
-		return this.each(function(){ 
-		    if( $.json2html.options.prepend ) $.fn.prepend.apply($(this),$.json2html(JSONObject, transform));
-			else  $.fn.append.apply($(this),$.json2html(JSONObject, transform));
+
+		// Extend the options (with defaults)
+		if (options !== undefined) {
+			$.extend($.json2html.options, options);
+		}
+
+		// Make sure to take care of any chaining
+		return this.each(function() {
+			if ($.json2html.options.prepend) {
+				$.fn.prepend.apply($(this), $.json2html(JSONObject, transform));
+			} else {
+				$.fn.append.apply($(this), $.json2html(JSONObject, transform));
+			}
 		});
-		
-	}
-		
-		//Perform the transformation
-		$.json2html = function(json, transform)
-		{
-			var type = jQuery.type(json);
 
-			if( transform === undefined || json === undefined ) return(undefined);
+	};
 
-			var elements = [];
+	// Perform the transformation
+	$.json2html = function(json, transform) {
+		var type = jQuery.type(json);
 
-			//Determine the type of this object
-			switch(type)
-			{
-				case 'array':
+		if (transform === undefined || json === undefined) {
+			return (undefined);
+		}
 
-					//Itterrate through the array and add it to the elements array
-					var len=json.length;
-					for(var j=0;j<len;++j)
-					{	
-						//Concat the return elements from this objects tranformation
-						elements = elements.concat($.json2html.apply(json[j],transform,j));
+		var elements = [];
 
+		// Determine the type of this object
+		switch (type) {
+		case 'array':
+
+			// Itterrate through the array and add it to the elements array
+			var len = json.length;
+			for ( var j = 0; j < len; ++j) {
+				// Concat the return elements from this objects tranformation
+				elements = elements.concat($.json2html.apply(json[j], transform, j));
+
+			}
+			break;
+
+		case 'object':
+			// Concat the return elements from this objects tranformation
+			elements = elements.concat($.json2html.apply(json, transform));
+			break;
+		}
+
+		// Return the element array
+		return (elements);
+	};
+
+	// Default Options
+	$.json2html.options = {
+		'eventData' : undefined,
+		'prepend' : false
+	};
+
+	// Apply the transform (at the first level)
+	$.json2html.apply = function(json, transform, index) {
+		var elements = [];
+		i = 0;
+
+		var objs = $.json2html.applyTransform(json, transform, index);
+
+		var objType = jQuery.type(objs);
+
+		// Flatten the return object
+		switch (objType) {
+		case 'array':
+			elements = elements.concat(objs);
+			i += objs.length;
+			break;
+
+		default:
+			elements[i] = objs;
+			i++;
+			break;
+		}
+
+		return (elements);
+	};
+
+	// Apply the transform at the second level
+	$.json2html.applyTransform = function(obj, transform, index) {
+		// var html = $(document.createElement('div'));
+		var objects = [];
+		var i = 0;
+		var type = jQuery.type(transform);
+
+		// Itterate through the transform and create html as needed
+		switch (type) {
+		case 'array':
+			var t_len = transform.length;
+			for ( var t = 0; t < t_len; ++t) {
+				objects = objects.concat($.json2html.applyTransform(obj, transform[t], index));
+			}
+			break;
+
+		case 'object':
+			// Get the tag element of this transform
+			var tag = transform.tag;
+			if (tag !== undefined) {
+				// Create a new element
+				var element = $(document.createElement(tag));
+
+				// Look into the properties of this transform
+				for ( var key in transform) {
+					if (transform.hasOwnProperty(key)) {
+						switch (key) {
+						case 'tag':
+							// Do nothing as we have already created the element from the tag
+							break;
+
+						case 'children':
+
+							// Add the children
+							var children = transform.children;
+							var c_type = jQuery.type(children);
+
+							switch (c_type) {
+							case 'function':
+								$.fn.append.apply($(element), children.call(obj, obj));
+								break;
+
+							case 'array':
+								$.fn.append.apply($(element), $.json2html.applyTransform(obj, transform.children, index));
+								break;
+
+							default:
+								// We only accept array's and functions for children
+								break;
+							}
+
+							break;
+
+						case 'html':
+							// Create the html attribute
+							$(element).html($.json2html.getValue(obj, transform, 'html', index));
+							break;
+
+						default:
+							// Add the property as a attribute if it's not a key one
+							var isEvent = false;
+
+							// Check if the first two characters are 'on' then this is an event
+							if (key.charAt(0) === 'o') {
+								if (key.charAt(1) === 'n') {
+									var data = {
+										'action' : transform[key],
+										'obj' : obj,
+										'data' : $.json2html.options.eventData,
+										'index' : index
+									};
+
+									// Bind the event to the element
+									$(element).bind(key.substring(key.indexOf('on') + 2), data, function(event) {
+										data.event = event;
+										data.action.call($(this), data);
+									});
+
+									isEvent = true;
+								}
+							}
+							// If this wasn't an even the add it as an attribute
+							if (!isEvent) {
+								$(element).attr(key, $.json2html.getValue(obj, transform, key, index));
+							}
+
+							break;
+						}
 					}
-				break;
+				}
 
-				case 'object':
-					//Concat the return elements from this objects tranformation
-					elements = elements.concat($.json2html.apply(json,transform));
-				break;
+				// Return the newly created element
+				objects[i] = element;
+				i++;
 			}
-
-			//Return the element array
-			return( elements );
-		}
-		
-		//Default Options
-		$.json2html.options = {
-			'eventData': undefined,
-			'prepend':false
+			break;
 		}
 
-		//Apply the transform (at the first level)
-		$.json2html.apply = function(json,transform,index)
-		{
-			var elements = [];
-			i = 0;
+		return (objects);
+	};
 
-			var objs = $.json2html.applyTransform(json, transform,index);
-					
-			var objType = jQuery.type(objs);
-			
-			//Flatten the return object
-			switch (objType)
-			{
-				case 'array':
-					elements = elements.concat(objs);
-					i += objs.length;
-				break;
+	// Get the html value of the object
+	$.json2html.getValue = function(obj, transform, key, index) {
+		var out = '';
 
-				default:
-					elements[i] = objs;
-					i++;
-				break;
-			}
+		var val = transform[key];
+		var type = jQuery.type(val);
 
-			return(elements);
-		}
+		switch (type) {
+		case 'function':
+			return (val.call(obj, obj, index));
+		case 'string':
+			var tf = function(src, real, re) {
+				return real ? src.replace(re, function(all, name) {
 
-		//Apply the transform at the second level
-		$.json2html.applyTransform = function(obj,transform,index)
-		{
-			//var html = $(document.createElement('div'));
-			var objects = [];
-			var i = 0;
-			var type = jQuery.type(transform);
+					// Split the string into it's seperate components
+					var components = name.split('.');
 
-			//Itterate through the transform and create html as needed
-			switch(type)
-			{
-				case 'array':
-					var t_len = transform.length;
-					for(var t=0; t < t_len; ++t)
-						objects = objects.concat($.json2html.applyTransform(obj, transform[t], index));
-				break;
+					// Set the object we use to query for this name to be the original object
+					var useObj = obj;
 
-				case 'object':
-					//Get the tag element of this transform
-					var tag = transform['tag'];
-					if( tag !== undefined )
-					{
-						//Create a new element
-						var element = $(document.createElement(tag));
+					// Output value
+					var outVal = '';
 
-						//Look into the properties of this transform
-						for (var key in transform) 
-						{
-							switch(key)
-							{
-								case 'tag':
-									//Do nothing as we have already created the element from the tag
-								break;
-
-								case 'children':
-
-									//Add the children
-									var children = transform['children'];
-									var c_type = jQuery.type(children);
-
-									switch( c_type )
-									{
-										case 'function':
-											$.fn.append.apply($(element),children.call(obj,obj));
-										break;
-
-										case 'array':													
-											$.fn.append.apply($(element),$.json2html.applyTransform(obj, transform['children'], index));
-										break;
-
-										default:
-											//We only accept array's and functions for children
-										break;
-									}
-									
-								break;
-
-								case 'html':
-									//Create the html attribute
-									$(element).html($.json2html.getValue(obj,transform,'html',index));
-								break;
-
-								default:
-									//Add the property as a attribute if it's not a key one
-									var isEvent = false;
-									
-									//Check if the first two characters are 'on' then this is an event
-									if( key.charAt(0) === 'o' )
-										if( key.charAt(1) === 'n')
-											{	
-												var data = {
-													'action':transform[key],
-													'obj':obj,
-													'data':$.json2html.options.eventData,
-													'index':index
-												};
-
-												//Bind the event to the element
-												$(element).bind(key.substring(key.indexOf('on')+2),data, function(event) {
-													data.event = event;
-													data.action.call($(this),data);
-												});
-
-												isEvent = true;
-											}
-									
-									//If this wasn't an even the add it as an attribute
-									if( !isEvent ) $(element).attr(key, $.json2html.getValue(obj, transform, key,index));
+					// Parse the object components
+					var c_len = components.length;
+					for ( var i = 0; i < c_len; ++i) {
+						if (components[i].length > 0) {
+							var newObj = useObj[components[i]];
+							useObj = newObj;
+							if (useObj === null || useObj === undefined) {
 								break;
 							}
 						}
-
-						//Return the newly created element
-						objects[i] = element;
-						i++;
 					}
-				break;
-			}
-			
-			return(objects);
+
+					// As long as we have an object to use then set the out
+					if (useObj !== null && useObj !== undefined) {
+						outVal = useObj;
+					}
+
+					return (outVal);
+				}) : src;
+			}, _tokenizer = new $.json2html.tokenizer([new RegExp("\\$\\{([^}{]+)\\}")], tf);
+
+			out = _tokenizer.parse(val).join('');
+			break;
 		}
 
-		//Get the html value of the object
-		$.json2html.getValue = function(obj, transform, key,index)
-		{
-			var out = '';
-			
-			var val = transform[key];
-			var type = jQuery.type(val);
-			
-			switch(type)
-			{
-				case 'function':
-					return(val.call(obj,obj,index));
-				break;
+		return (out);
+	};
 
-				case 'string':
-						var _tokenizer = new $.json2html.tokenizer([
-							/\${([^\}\{]+)}/
-						 ],function( src, real, re ){
-							return real ? src.replace(re,function(all,name){
-								
-								//Split the string into it's seperate components
-								var components = name.split('.');
+	// Tokenizer
+	$.json2html.tokenizer = function(tokenizers, doBuild) {
 
-								//Set the object we use to query for this name to be the original object
-								var useObj = obj;
-
-								//Output value
-								var outVal = '';
-								
-								//Parse the object components
-								var c_len = components.length;
-								for (var i=0;i<c_len;++i)
-								{
-									if( components[i].length > 0 )
-									{
-										var newObj = useObj[components[i]];
-										useObj = newObj;
-										if(useObj === null || useObj === undefined) break;
-									}
-								}
-								
-								//As long as we have an object to use then set the out
-								if(useObj !== null && useObj !== undefined) outVal = useObj;
-
-							    return(outVal);
-							}) : src;
-						  }
-						);
-						
-						out = _tokenizer.parse(val).join('');
-				break;
-			}
-
-			return(out);
+		if (!(this instanceof $.json2html.tokenizer)) {
+			return new $.json2html.tokenizer(tokenizers, onEnd, onFound);
 		}
-		
-		//Tokenizer
-		$.json2html.tokenizer = function( tokenizers, doBuild ){
 
-			if( !(this instanceof $.json2html.tokenizer ) )
-				return new $.json2html.tokenizer( tokenizers, onEnd, onFound );
-				
-			this.tokenizers = tokenizers.splice ? tokenizers : [tokenizers];
-			if( doBuild )
-				this.doBuild = doBuild;
+		this.tokenizers = tokenizers.splice ? tokenizers : [ tokenizers ];
+		if (doBuild) {
+			this.doBuild = doBuild;
+		}
 
-			this.parse = function( src ){
-				this.src = src;
-				this.ended = false;
-				this.tokens = [ ];
-				do this.next(); while( !this.ended );
-				return this.tokens;
+		this.parse = function(src) {
+			this.src = src;
+			this.ended = false;
+			this.tokens = [];
+			do {
+				this.next();
+			} while (!this.ended);
+
+			return this.tokens;
+		};
+
+		this.build = function(src, real) {
+			if (src) {
+				this.tokens.push(!this.doBuild ? src : this.doBuild(src, real, this.tkn));
 			}
-			
-			this.build = function( src, real ){
-				if( src )
-					this.tokens.push(
-						!this.doBuild ? src :
-						this.doBuild(src,real,this.tkn)
-					);	
-			}
+		};
 
-			this.next = function(){
-				var self = this,
-					plain;
-					
-				self.findMin();
-				plain = self.src.slice(0, self.min);
-				
-				self.build( plain, false );
-					
-				self.src = self.src.slice(self.min).replace(self.tkn,function( all ){
-					self.build(all, true);
-					return '';
-				});
-				
-				if( !self.src )
-					self.ended = true;
-			}
+		this.next = function() {
+			var self = this, plain;
 
-			this.findMin = function(){
-				var self = this, i=0, tkn, idx;
-				self.min = -1;
-				self.tkn = '';
-				
-				while(( tkn = self.tokenizers[i++]) !== undefined ){
-					idx = self.src[tkn.test?'search':'indexOf'](tkn);
-					if( idx != -1 && (self.min == -1 || idx < self.min )){
-						self.tkn = tkn;
-						self.min = idx;
-					}
+			self.findMin();
+			plain = self.src.slice(0, self.min);
+
+			self.build(plain, false);
+
+			self.src = self.src.slice(self.min).replace(self.tkn, function(all) {
+				self.build(all, true);
+				return '';
+			});
+
+			if (!self.src) {
+				self.ended = true;
+			}
+		};
+
+		this.findMin = function() {
+			var self = this, i = 0, tkn, idx;
+			self.min = -1;
+			self.tkn = '';
+
+			while ((tkn = self.tokenizers[i++]) !== undefined) {
+				idx = self.src[tkn.test ? 'search' : 'indexOf'](tkn);
+				if (idx != -1 && (self.min == -1 || idx < self.min)) {
+					self.tkn = tkn;
+					self.min = idx;
 				}
-				if( self.min == -1 )
-					self.min = self.src.length;
 			}
-		}
+			if (self.min == -1) {
+				self.min = self.src.length;
+			}
+		};
+	};
 
-})(jQuery);
-
-jQuery.atmosphere=function(){jQuery(window).unload(function(){jQuery.atmosphere.unsubscribe()});var a=function(a){var b,c=/^(.*?):[ \t]*([^\r\n]*)\r?$/gm,d={};while(b=c.exec(a))d[b[1]]=b[2];return d};return{version:"1.0",requests:[],callbacks:[],onError:function(){},onClose:function(){},onOpen:function(){},onMessage:function(){},onReconnect:function(){},onMessagePublished:function(){},onTransportFailure:function(){},AtmosphereRequest:function(b){function o(){e=0,l=!0,n=!1,m=0,f=null,g=null,h=null,j=null}function p(){$(),o()}function q(a){p(),c=jQuery.extend(c,a),e=jQuery.atmosphere.guid()}function r(){return c.webSocketImpl!=null||window.WebSocket||window.MozWebSocket}function s(){return window.EventSource}function t(){c.transport!="websocket"&&c.transport!="sse"?(u("opening",c.transport,c),H()):c.transport=="websocket"?r()?B(!1):E("Websocket is not supported, using request.fallbackTransport ("+c.fallbackTransport+")"):c.transport=="sse"&&(s()?A(!1):E("Server Side Events(SSE) is not supported, using request.fallbackTransport ("+c.fallbackTransport+")"))}function u(a,b,c){c.close=function(){Z(),c.reconnect=!1},d.request=c;var e=d.state;d.state=a,d.status=200;var f=d.transport;d.transport=b,Y(),d.state=e,d.transport=f}function v(a){var b=c;a!=null&&a!==void 0&&(b=a);var d=b.url,e=b.data;b.attachHeadersAsQueryString&&(d=F(b),e!=""&&(d+="&X-Atmosphere-Post-Body="+e),e=""),k=jQuery.ajax({url:d,type:b.method,dataType:"jsonp",error:function(a,c){300>a.status&&b.maxRequest>b.requestCount++?J(k,b):V(c,"error",a.status,b.transport)},jsonp:"jsonpTransport",success:function(a){if(b.maxRequest>b.requestCount++){b.executeCallbackBeforeReconnect&&J(k,b);var d=a.message;if(d!=null&&typeof d!="string")try{d=jQuery.stringifyJSON(d)}catch(e){}V(d,"messageReceived",200,b.transport),b.executeCallbackBeforeReconnect||J(k,b)}else jQuery.atmosphere.log(c.logLevel,["JSONP reconnect maximum try reached "+c.requestCount]),C()},data:b.data,beforeSend:function(a){I(a,b,!1)}})}function w(a){var b=c;a!=null&&a!==void 0&&(b=a);var d=b.url,e=b.data;b.attachHeadersAsQueryString&&(d=F(b),e!=""&&(d+="&X-Atmosphere-Post-Body="+e),e=""),k=jQuery.ajax({url:d,type:b.method,error:function(a,c){300>a.status&&b.maxRequest>b.requestCount++?J(k,b):V(c,"error",a.status,b.transport)},success:function(a){b.maxRequest>b.requestCount++?(b.executeCallbackBeforeReconnect&&J(k,b),V(a,"messageReceived",200,b.transport),b.executeCallbackBeforeReconnect||J(k,b)):(jQuery.atmosphere.log(c.logLevel,["AJAX reconnect maximum try reached "+c.requestCount]),C())},data:b.data,beforeSend:function(a){I(a,b,!1)}})}function x(a){return c.webSocketImpl!=null?c.webSocketImpl:window.WebSocket?new WebSocket(a):new MozWebSocket(a)}function y(){var a=c.url;return a=F(),decodeURI(jQuery('<a href="'+a+'"/>')[0].href.replace(/^http/,"ws"))}function z(){var a=c.url;return a=F()}function A(a){d.transport="sse";var b=z(c.url);return jQuery.atmosphere.log(c.logLevel,["Invoking executeSSE"]),c.logLevel=="debug"&&jQuery.atmosphere.debug("Using URL: "+b),a&&u("re-opening","sse",c),c.reconnect?(g=new EventSource(b,{withCredentials:c.withCredentials}),c.connectTimeout>0&&(c.id=setTimeout(function(){a||g.close()},c.connectTimeout)),g.onopen=function(){c.logLevel=="debug"&&jQuery.atmosphere.debug("SSE successfully opened"),a||u("opening","sse",c),a=!0,c.method=="POST"&&(d.state="messageReceived",g.send(c.data))},g.onmessage=function(a){d.state="messageReceived",d.status=200;var a=a.data,b=D(a,c,d);jQuery.trim(a).length==0&&(b=!0),b||(Y(),d.responseBody="")},g.onerror=function(){clearTimeout(c.id),d.state="closed",d.responseBody="",d.status=a?200:501,Y(),n?jQuery.atmosphere.log(c.logLevel,["SSE closed normally"]):a?c.reconnect&&d.transport=="sse"&&(c.maxRequest>m++?(c.requestCount=m,d.responseBody="",A(!0)):(g.close(),jQuery.atmosphere.log(c.logLevel,["SSE reconnect maximum try reached "+c.requestCount]),C())):E("SSE failed. Downgrading to fallback transport and resending")},void 0):(g!=null&&g.close(),void 0)}function B(a){d.transport="websocket";var b=y(c.url),e=!1;return jQuery.atmosphere.log(c.logLevel,["Invoking executeWebSocket"]),c.logLevel=="debug"&&jQuery.atmosphere.debug("Using URL: "+b),a&&u("re-opening","websocket",c),c.reconnect?(f=x(b),c.connectTimeout>0&&(c.id=setTimeout(function(){if(!a){var b={code:1002,reason:"",wasClean:!1};f.onclose(b);try{f.close()}catch(c){}}},c.connectTimeout)),f.onopen=function(){c.logLevel=="debug"&&jQuery.atmosphere.debug("Websocket successfully opened"),a||u("opening","websocket",c),a=!0,c.method=="POST"&&(d.state="messageReceived",f.send(c.data))},f.onmessage=function(a){a.data.indexOf("parent.callback")!=-1&&jQuery.atmosphere.log(c.logLevel,["parent.callback no longer supported with 0.8 version and up. Please upgrade"]),d.state="messageReceived",d.status=200;var a=a.data,b=D(a,c,d);b||(Y(),d.responseBody="")},f.onerror=function(){clearTimeout(c.id)},f.onclose=function(b){if(!e){var f=b.reason;if(f==="")switch(b.code){case 1e3:f="Normal closure; the connection successfully completed whatever purpose for which it was created.";break;case 1001:f="The endpoint is going away, either because of a server failure or because the browser is navigating away from the page that opened the connection.";break;case 1002:f="The endpoint is terminating the connection due to a protocol error.";break;case 1003:f="The connection is being terminated because the endpoint received data of a type it cannot accept (for example, a text-only endpoint received binary data).";break;case 1004:f="The endpoint is terminating the connection because a data frame was received that is too large.";break;case 1005:f="Unknown: no status code was provided even though one was expected.";break;case 1006:f="Connection was closed abnormally (that is, with no close frame being sent)."}jQuery.atmosphere.warn("Websocket closed, reason: "+f),jQuery.atmosphere.warn("Websocket closed, wasClean: "+b.wasClean),d.state="closed",d.responseBody="",d.status=a?200:501,Y(),clearTimeout(c.id),e=!0,n?jQuery.atmosphere.log(c.logLevel,["Websocket closed normally"]):a?c.reconnect&&d.transport=="websocket"&&(c.reconnect&&c.maxRequest>m++?(c.requestCount=m,d.responseBody="",B(!0)):(jQuery.atmosphere.log(c.logLevel,["Websocket reconnect maximum try reached "+c.requestCount]),jQuery.atmosphere.warn("Websocket error, reason: "+b.reason),C())):E("Websocket failed. Downgrading to Comet and resending")}},void 0):(f!=null&&f.close(),void 0)}function C(){d.state="error",d.responseBody="",d.status=500,Y()}function D(a,b,c){if(b.trackMessageLength){var d=a.indexOf(b.messageDelimiter),e=c.expectedBodySize;if(d!=-1&&(e=a.substring(0,d),a=a.substring(d+1),c.expectedBodySize=e),d!=-1?c.responseBody=a:c.responseBody+=a,c.responseBody.length!=e)return!0}else c.responseBody=a;return!1}function E(a){jQuery.atmosphere.log(c.logLevel,[a]),c.onTransportFailure!==void 0?c.onTransportFailure(a,c):jQuery.atmosphere.onTransportFailure!==void 0&&jQuery.atmosphere.onTransportFailure(a,c),c.transport=c.fallbackTransport,(c.reconnect&&c.transport!="none"||c.transport==null)&&(c.method=c.fallbackMethod,d.transport=c.fallbackTransport,t())}function F(a){var b=c;a!=null&&a!==void 0&&(b=a);var f=b.url;return b.attachHeadersAsQueryString?f.indexOf("X-Atmosphere-Framework")!=-1?f:(f+=f.indexOf("?")!=-1?"&":"?",f+="X-Atmosphere-tracking-id="+e,f+="&X-Atmosphere-Framework="+jQuery.atmosphere.version,f+="&X-Atmosphere-Transport="+b.transport,b.trackMessageLength&&(f+="&X-Atmosphere-TrackMessageSize=true"),f+=b.lastTimestamp!=void 0?"&X-Cache-Date="+b.lastTimestamp:"&X-Cache-Date=0",b.contentType!=""&&(f+="&Content-Type="+b.contentType),jQuery.each(b.headers,function(c,e){var g=jQuery.isFunction(e)?e.call(this,b,a,d):e;g!=null&&(f+="&"+encodeURIComponent(c)+"="+encodeURIComponent(g))}),f):f}function G(){var a;if(jQuery.browser.msie)for(var b=["Msxml2.XMLHTTP","Microsoft.XMLHTTP"],c=0;b.length>c;c++)try{a=new ActiveXObject(b[c])}catch(d){}else window.XMLHttpRequest&&(a=new XMLHttpRequest);return a}function H(b){var e=c;if((b!=null||b!==void 0)&&(e=b),e.transport=="jsonp"||e.enableXDR&&jQuery.atmosphere.checkCORSSupport())return v(e),void 0;if(e.transport=="ajax")return w(b),void 0;if(e.transport=="streaming"&&jQuery.browser.msie)return e.enableXDR&&window.XDomainRequest?K(e):M(e),void 0;if(e.enableXDR&&window.XDomainRequest)return K(e),void 0;if(e.reconnect&&e.maxRequest>e.requestCount++){var f=G();I(f,e,!0),e.suspend&&(h=f),e.transport!="polling"&&(d.transport=e.transport);var g=!1;jQuery.browser.msie||(f.onerror=function(){g=!0;try{d.status=XMLHttpRequest.status}catch(a){d.status=404}d.state="error",Y(),f.abort(),h=null}),f.onreadystatechange=function(){if(!n){var b=!1,g=!1;if(e.transport=="streaming"&&e.readyState>2&&f.readyState==4)return e.readyState=0,e.lastIndex=0,J(f,e,!0),void 0;if(e.readyState=f.readyState,f.readyState==4?jQuery.browser.msie?g=!0:e.transport=="streaming"?g=!0:e.transport=="long-polling"&&(g=!0,clearTimeout(e.id)):jQuery.browser.msie||f.readyState!=3||f.status!=200||e.transport=="long-polling"?clearTimeout(e.id):g=!0,g){var h=f.responseText;if(!c.dropAtmosphereHeaders)try{var i=f.getResponseHeader("X-Cache-Date");(i!=null||i!=void 0)&&(c.lastTimestamp=i.split(" ").pop())}catch(j){}if(this.previousLastIndex=e.lastIndex,e.transport=="streaming"){var k=h.substring(e.lastIndex,h.length);if(d.isJunkEnded=!0,e.lastIndex==0&&k.indexOf("<!-- Welcome to the Atmosphere Framework.")!=-1&&(d.isJunkEnded=!1),d.isJunkEnded){var p=h.substring(e.lastIndex,h.length);b=D(p,e,d)}else{var l="<!-- EOD -->",m=l.length,o=k.indexOf(l)+m;o>m&&o!=k.length?d.responseBody=k.substring(o):b=!0}if(e.lastIndex=h.length,jQuery.browser.opera&&jQuery.atmosphere.iterate(function(){if(f.responseText.length>e.lastIndex){try{d.status=f.status,d.headers=a(f.getAllResponseHeaders()),c.headers&&jQuery.each(c.headers,function(a){var b=f.getResponseHeader(a);b&&(d.headers[a]=b)})}catch(b){d.status=404}d.state="messageReceived",d.responseBody=f.responseText.substring(e.lastIndex),e.lastIndex=f.responseText.length,Y(),e.transport=="streaming"&&f.responseText.length>e.maxStreamingLength&&(f.abort(),I(f,e,!0))}},0),b)return}else b=D(h,e,d),e.lastIndex=h.length;try{d.status=f.status,d.headers=a(f.getAllResponseHeaders()),c.headers&&jQuery.each(c.headers,function(a){var b=f.getResponseHeader(a);b&&(d.headers[a]=b)})}catch(j){d.status=404}d.state=e.suspend?d.status==0?"closed":"messageReceived":"messagePublished",e.executeCallbackBeforeReconnect||J(f,e,!1),d.responseBody.indexOf("parent.callback")!=-1&&jQuery.atmosphere.log(e.logLevel,["parent.callback no longer supported with 0.8 version and up. Please upgrade"]),Y(),e.executeCallbackBeforeReconnect&&J(f,e,!1),e.transport=="streaming"&&h.length>e.maxStreamingLength&&(f.abort(),I(f,e,!0))}}},f.send(e.data),e.suspend&&(e.id=setTimeout(function(){l&&(f.abort(),q(e),t())},e.timeout)),l=!0}else jQuery.atmosphere.log(e.logLevel,["Max re-connection reached."]),C()}function I(a,b,f){var g=jQuery.atmosphere.prepareURL(b.url);f&&(a.open(b.method,g,!0),b.connectTimeout>-1&&(b.id=setTimeout(function(){b.requestCount==0&&(a.abort(),V("Connect timeout","closed",200,b.transport))},b.connectTimeout))),c.withCredentials&&"withCredentials"in a&&(a.withCredentials=!0),c.dropAtmosphereHeaders||(a.setRequestHeader("X-Atmosphere-Framework",jQuery.atmosphere.version),a.setRequestHeader("X-Atmosphere-Transport",b.transport),b.lastTimestamp!=void 0?a.setRequestHeader("X-Cache-Date",b.lastTimestamp):a.setRequestHeader("X-Cache-Date",0),b.trackMessageLength&&a.setRequestHeader("X-Atmosphere-TrackMessageSize","true"),b.contentType!=""&&a.setRequestHeader("Content-Type",b.contentType),a.setRequestHeader("X-Atmosphere-tracking-id",e),jQuery.each(b.headers,function(c,e){var g=jQuery.isFunction(e)?e.call(this,a,b,f,d):e;g!=null&&a.setRequestHeader(c,g)}))}function J(a,b,c){(c||b.suspend&&a.status==200&&b.transport!="streaming"&&l)&&(u("re-opening",b.transport,b),b.reconnect&&H())}function K(a){j=L(a),j.open()}function L(a){var b=c;a!=null&&a!==void 0&&(b=a);var d="",e=b.transport,f=0,g=function(a){var b=a.responseText,c=!1;if(b.indexOf("<!-- Welcome to the Atmosphere Framework.")!=-1&&(c=!0),c){var d="<!-- EOD -->",g=d.length,h=b.indexOf(d)+g;b=b.substring(h+f),f+=b.length}V(b,"messageReceived",200,e)},h=new window.XDomainRequest,i=b.rewriteURL||function(a){var b=/(?:^|;\s*)(JSESSIONID|PHPSESSID)=([^;]*)/.exec(document.cookie);switch(b&&b[1]){case"JSESSIONID":return a.replace(/;jsessionid=[^\?]*|(\?)|$/,";jsessionid="+b[2]+"$1");case"PHPSESSID":return a.replace(/\?PHPSESSID=[^&]*&?|\?|$/,"?PHPSESSID="+b[2]+"&").replace(/&$/,"")}};return h.onprogress=function(){g(h)},h.onerror=function(){V(h.responseText,"error",500,e)},h.onload=function(){d!=h.responseText&&g(h),b.transport=="long-polling"&&H()},{open:function(){b.method=="POST"&&(b.attachHeadersAsQueryString=!0);var a=F(b);b.method=="POST"&&(a+="&X-Atmosphere-Post-Body="+b.data),h.open(b.method,i(a)),h.send(),b.connectTimeout>-1&&(b.id=setTimeout(function(){b.requestCount==0&&(h.abort(),V("Connect timeout","closed",200,b.transport))},b.connectTimeout))},close:function(){h.abort(),V(h.responseText,"closed",200,e)}}}function M(a){j=N(a),j.open()}function N(a){var b=c;a!=null&&a!==void 0&&(b=a);var e,f=new window.ActiveXObject("htmlfile");f.open(),f.close();var g=b.url;return b.transport!="polling"&&(d.transport=b.transport),{open:function(){var a=f.createElement("iframe");g=F(b),b.data!=""&&(g+="&X-Atmosphere-Post-Body="+b.data),g=jQuery.atmosphere.prepareURL(g),a.src=g,f.body.appendChild(a);var c=a.contentDocument||a.contentWindow.document;e=jQuery.atmosphere.iterate(function(){try{if(!c.firstChild)return;if(c.readyState==="complete")try{jQuery.noop(c.fileSize)}catch(a){return V("Connection Failure","error",500,b.transport),!1}var f=c.body?c.body.lastChild:c,g=function(){var a=f.cloneNode(!0);a.appendChild(c.createTextNode("."));var b=a.innerText,d=!0;if(b.indexOf("<!-- Welcome to the Atmosphere Framework.")==-1&&(d=!1),d){var e="<!-- EOD -->",g=e.length,h=b.indexOf(e)+g;b=b.substring(h)}return b.substring(0,b.length-1)};if(!jQuery.nodeName(f,"pre")){var h=c.head||c.getElementsByTagName("head")[0]||c.documentElement||c,i=c.createElement("script");i.text="document.write('<plaintext>')",h.insertBefore(i,h.firstChild),h.removeChild(i),f=c.body.lastChild}return V(g(),"opening",200,b.transport),e=jQuery.atmosphere.iterate(function(){var a=g();return a.length>b.lastIndex&&(d.status=200,V(a,"messageReceived",200,b.transport),f.innerText="",b.lastIndex=0),c.readyState==="complete"?(V("","re-opening",200,b.transport),M(b),!1):void 0},null),!1}catch(j){jQuery.atmosphere.error(j)}})},close:function(){e&&e(),f.execCommand("Stop"),V("","closed",200,b.transport)}}}function O(a){h!=null||g!=null?P(a):j!=null?Q(a):k!=null?R(a):f!=null&&U(a)}function P(a){var b=T(a);H(b)}function Q(a){P(a)}function R(a){P(a)}function S(a){var b=a;return typeof b=="object"&&(b=a.data),b}function T(a){var b=S(a),d={connected:!1,timeout:6e4,method:"POST",url:c.url,contentType:c.contentType,headers:{},reconnect:!0,callback:null,data:b,suspend:!1,maxRequest:60,logLevel:"info",requestCount:0,transport:"polling"};return typeof a=="object"&&(d=jQuery.extend(d,a)),d}function U(a){var d,b=S(a);try{d=c.webSocketUrl!=null?c.webSocketPathDelimiter+c.webSocketUrl+c.webSocketPathDelimiter+b:b,f.send(d)}catch(e){f.onclose=function(){},f.close(),E("Websocket failed. Downgrading to Comet and resending "+d),P(a)}}function V(a,b,e,f){b=="messageReceived"&&D(a,c,d)||(d.transport=f,d.status=e,d.expectedBodySize==-1&&(d.responseBody=a),d.state=b,Y())}function W(a){X(a,c),X(a,jQuery.atmosphere)}function X(a,b){switch(a.state){case"messageReceived":b.onMessage!==void 0&&b.onMessage(a);break;case"error":b.onError!==void 0&&b.onError(a);break;case"opening":b.onOpen!==void 0&&b.onOpen(a);break;case"messagePublished":b.onMessagePublished!==void 0&&b.onMessagePublished(a);break;case"re-opening":b.onReconnect!==void 0&&b.onReconnect(c,a);break;case"closed":b.onClose!==void 0&&b.onClose(a)}}function Y(){var a=function(a,b){b(d)},b=typeof d.responseBody=="string"?d.responseBody.split(c.messageDelimiter):Array(d.responseBody);for(i=0;b.length>i;i++)if(!(b.length>1&&b[i].length==0)){if(d.responseBody=jQuery.trim(b[i]),W(d),jQuery.atmosphere.callbacks.length>0){jQuery.atmosphere.debug("Invoking "+jQuery.atmosphere.callbacks.length+" global callbacks: "+d.state);try{jQuery.each(jQuery.atmosphere.callbacks,a)}catch(e){jQuery.atmosphere.log(c.logLevel,["Callback exception"+e])}}if(typeof c.callback=="function"){c.logLevel=="debug"&&jQuery.atmosphere.debug("Invoking request callbacks");try{c.callback(d)}catch(e){jQuery.atmosphere.log(c.logLevel,["Callback exception"+e])}}}}function Z(){c.reconnect=!1,d.request=c,l=!1,n=!0,d.state="unsubscribe",d.responseBody="",d.status=408,Y(),$()}function $(){j!=null&&(j.close(),j=null),k!=null&&(k.abort(),k=null),h!=null&&(h.abort(),h=null),f!=null&&(f.close(),f=null),g!=null&&(g.close(),g=null)}var c={timeout:3e5,method:"GET",headers:{},contentType:"",callback:null,url:"",data:"",suspend:!0,maxRequest:60,reconnect:!0,maxStreamingLength:1e7,lastIndex:0,logLevel:"info",requestCount:0,fallbackMethod:"GET",fallbackTransport:"streaming",transport:"long-polling",webSocketImpl:null,webSocketUrl:null,webSocketPathDelimiter:"@@",enableXDR:!1,rewriteURL:!1,attachHeadersAsQueryString:!0,executeCallbackBeforeReconnect:!1,readyState:0,lastTimestamp:0,withCredentials:!1,trackMessageLength:!1,messageDelimiter:"|",connectTimeout:-1,dropAtmosphereHeaders:!1,onError:function(){},onClose:function(){},onOpen:function(){},onMessage:function(){},onReconnect:function(){},onMessagePublished:function(){},onTransportFailure:function(){}},d={status:200,responseBody:"",expectedBodySize:-1,headers:[],state:"messageReceived",transport:"polling",error:null,request:null,id:0},e=0,f=null,g=null,h=null,j=null,k=null,l=!0,m=0,n=!1;q(b),this.subscribe=function(a){q(a),t()},this.execute=function(){t()},this.invokeCallback=function(){Y()},this.close=function(){Z()},this.getUrl=function(){return c.url},this.push=function(a){O(a)},this.response=d},subscribe:function(a,b,c){typeof b=="function"&&jQuery.atmosphere.addCallback(b),typeof a!="string"?c=a:c.url=a;var d=new jQuery.atmosphere.AtmosphereRequest(c);return d.execute(),jQuery.atmosphere.requests[jQuery.atmosphere.requests.length]=d,d},addCallback:function(a){jQuery.inArray(a,jQuery.atmosphere.callbacks)==-1&&jQuery.atmosphere.callbacks.push(a)},removeCallback:function(a){var b=jQuery.inArray(a,jQuery.atmosphere.callbacks);b!=-1&&jQuery.atmosphere.callbacks.splice(b,1)},unsubscribe:function(){if(jQuery.atmosphere.requests.length>0)for(var a=0;jQuery.atmosphere.requests.length>a;a++)jQuery.atmosphere.requests[a].close(),clearTimeout(jQuery.atmosphere.requests[a].id);jQuery.atmosphere.requests=[],jQuery.atmosphere.callbacks=[]},unsubscribeUrl:function(a){var b=-1;if(jQuery.atmosphere.requests.length>0)for(var c=0;jQuery.atmosphere.requests.length>c;c++){var d=jQuery.atmosphere.requests[c];if(d.getUrl()==a){d.close(),clearTimeout(d.id),b=c;break}}b>=0&&jQuery.atmosphere.requests.splice(b,1)},publish:function(a){typeof a.callback=="function"&&jQuery.atmosphere.addCallback(callback),a.transport="polling";var b=new jQuery.atmosphere.AtmosphereRequest(a);return jQuery.atmosphere.requests[jQuery.atmosphere.requests.length]=b,b},checkCORSSupport:function(){if(jQuery.browser.msie&&!window.XDomainRequest)return!0;if(jQuery.browser.opera)return!0;var a=navigator.userAgent.toLowerCase(),b=a.indexOf("android")>-1;return b?!0:!1},S4:function(){return((1+Math.random())*65536|0).toString(16).substring(1)},guid:function(){return jQuery.atmosphere.S4()+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+jQuery.atmosphere.S4()+jQuery.atmosphere.S4()},prepareURL:function(a){var b=jQuery.now(),c=a.replace(/([?&])_=[^&]*/,"$1_="+b);return c+(c===a?(/\?/.test(a)?"&":"?")+"_="+b:"")},param:function(a){return jQuery.param(a,jQuery.ajaxSettings.traditional)},iterate:function(a,b){var c;return b=b||0,function d(){c=setTimeout(function(){a()!==!1&&d()},b)}(),function(){clearTimeout(c)}},log:function(a,b){if(window.console){var c=window.console[a];typeof c=="function"&&c.apply(window.console,b)}},warn:function(){jQuery.atmosphere.log("warn",arguments)},info:function(){jQuery.atmosphere.log("info",arguments)},debug:function(){jQuery.atmosphere.log("debug",arguments)},error:function(){jQuery.atmosphere.log("error",arguments)}}}(),function(a){function d(a){return'"'+a.replace(b,function(a){var b=c[a];return typeof b=="string"?b:"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4)})+'"'}function e(a){return 10>a?"0"+a:a}function f(a,b){var c,g,h,i,j=b[a],k=typeof j;switch(j&&typeof j=="object"&&typeof j.toJSON=="function"&&(j=j.toJSON(a),k=typeof j),k){case"string":return d(j);case"number":return isFinite(j)?j+"":"null";case"boolean":return j+"";case"object":if(!j)return"null";switch(Object.prototype.toString.call(j)){case"[object Date]":return isFinite(j.valueOf())?'"'+j.getUTCFullYear()+"-"+e(j.getUTCMonth()+1)+"-"+e(j.getUTCDate())+"T"+e(j.getUTCHours())+":"+e(j.getUTCMinutes())+":"+e(j.getUTCSeconds())+"Z"+'"':"null";case"[object Array]":for(h=j.length,i=[],c=0;h>c;c++)i.push(f(c,j)||"null");return"["+i.join(",")+"]";default:i=[];for(c in j)Object.prototype.hasOwnProperty.call(j,c)&&(g=f(c,j),g&&i.push(d(c)+":"+g));return"{"+i.join(",")+"}"}}}var b=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,c={"\b":"\\b","	":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};a.stringifyJSON=function(a){return window.JSON&&window.JSON.stringify?window.JSON.stringify(a):f("",{"":a})}}(jQuery);(function($, NS) {
+})(jQuery);jQuery.atmosphere=function(){jQuery(window).unload(function(){jQuery.atmosphere.unsubscribe()});var a=function(a){var b,c=/^(.*?):[ \t]*([^\r\n]*)\r?$/gm,d={};while(b=c.exec(a))d[b[1]]=b[2];return d};return{version:"1.0",requests:[],callbacks:[],onError:function(){},onClose:function(){},onOpen:function(){},onMessage:function(){},onReconnect:function(){},onMessagePublished:function(){},onTransportFailure:function(){},AtmosphereRequest:function(b){function o(){e=0,l=!0,n=!1,m=0,f=null,g=null,h=null,j=null}function p(){$(),o()}function q(a){p(),c=jQuery.extend(c,a),e=jQuery.atmosphere.guid()}function r(){return c.webSocketImpl!=null||window.WebSocket||window.MozWebSocket}function s(){return window.EventSource}function t(){c.transport!="websocket"&&c.transport!="sse"?(u("opening",c.transport,c),H()):c.transport=="websocket"?r()?B(!1):E("Websocket is not supported, using request.fallbackTransport ("+c.fallbackTransport+")"):c.transport=="sse"&&(s()?A(!1):E("Server Side Events(SSE) is not supported, using request.fallbackTransport ("+c.fallbackTransport+")"))}function u(a,b,c){c.close=function(){Z(),c.reconnect=!1},d.request=c;var e=d.state;d.state=a,d.status=200;var f=d.transport;d.transport=b,Y(),d.state=e,d.transport=f}function v(a){var b=c;a!=null&&a!==void 0&&(b=a);var d=b.url,e=b.data;b.attachHeadersAsQueryString&&(d=F(b),e!=""&&(d+="&X-Atmosphere-Post-Body="+e),e=""),k=jQuery.ajax({url:d,type:b.method,dataType:"jsonp",error:function(a,c){300>a.status&&b.maxRequest>b.requestCount++?J(k,b):V(c,"error",a.status,b.transport)},jsonp:"jsonpTransport",success:function(a){if(b.maxRequest>b.requestCount++){b.executeCallbackBeforeReconnect&&J(k,b);var d=a.message;if(d!=null&&typeof d!="string")try{d=jQuery.stringifyJSON(d)}catch(e){}V(d,"messageReceived",200,b.transport),b.executeCallbackBeforeReconnect||J(k,b)}else jQuery.atmosphere.log(c.logLevel,["JSONP reconnect maximum try reached "+c.requestCount]),C()},data:b.data,beforeSend:function(a){I(a,b,!1)}})}function w(a){var b=c;a!=null&&a!==void 0&&(b=a);var d=b.url,e=b.data;b.attachHeadersAsQueryString&&(d=F(b),e!=""&&(d+="&X-Atmosphere-Post-Body="+e),e=""),k=jQuery.ajax({url:d,type:b.method,error:function(a,c){300>a.status&&b.maxRequest>b.requestCount++?J(k,b):V(c,"error",a.status,b.transport)},success:function(a){b.maxRequest>b.requestCount++?(b.executeCallbackBeforeReconnect&&J(k,b),V(a,"messageReceived",200,b.transport),b.executeCallbackBeforeReconnect||J(k,b)):(jQuery.atmosphere.log(c.logLevel,["AJAX reconnect maximum try reached "+c.requestCount]),C())},data:b.data,beforeSend:function(a){I(a,b,!1)}})}function x(a){return c.webSocketImpl!=null?c.webSocketImpl:window.WebSocket?new WebSocket(a):new MozWebSocket(a)}function y(){var a=c.url;return a=F(),decodeURI(jQuery('<a href="'+a+'"/>')[0].href.replace(/^http/,"ws"))}function z(){var a=c.url;return a=F()}function A(a){d.transport="sse";var b=z(c.url);return jQuery.atmosphere.log(c.logLevel,["Invoking executeSSE"]),c.logLevel=="debug"&&jQuery.atmosphere.debug("Using URL: "+b),a&&u("re-opening","sse",c),c.reconnect?(g=new EventSource(b,{withCredentials:c.withCredentials}),c.connectTimeout>0&&(c.id=setTimeout(function(){a||g.close()},c.connectTimeout)),g.onopen=function(){c.logLevel=="debug"&&jQuery.atmosphere.debug("SSE successfully opened"),a||u("opening","sse",c),a=!0,c.method=="POST"&&(d.state="messageReceived",g.send(c.data))},g.onmessage=function(a){d.state="messageReceived",d.status=200;var a=a.data,b=D(a,c,d);jQuery.trim(a).length==0&&(b=!0),b||(Y(),d.responseBody="")},g.onerror=function(){clearTimeout(c.id),d.state="closed",d.responseBody="",d.status=a?200:501,Y(),n?jQuery.atmosphere.log(c.logLevel,["SSE closed normally"]):a?c.reconnect&&d.transport=="sse"&&(c.maxRequest>m++?(c.requestCount=m,d.responseBody="",A(!0)):(g.close(),jQuery.atmosphere.log(c.logLevel,["SSE reconnect maximum try reached "+c.requestCount]),C())):E("SSE failed. Downgrading to fallback transport and resending")},void 0):(g!=null&&g.close(),void 0)}function B(a){d.transport="websocket";var b=y(c.url),e=!1;return jQuery.atmosphere.log(c.logLevel,["Invoking executeWebSocket"]),c.logLevel=="debug"&&jQuery.atmosphere.debug("Using URL: "+b),a&&u("re-opening","websocket",c),c.reconnect?(f=x(b),c.connectTimeout>0&&(c.id=setTimeout(function(){if(!a){var b={code:1002,reason:"",wasClean:!1};f.onclose(b);try{f.close()}catch(c){}}},c.connectTimeout)),f.onopen=function(){c.logLevel=="debug"&&jQuery.atmosphere.debug("Websocket successfully opened"),a||u("opening","websocket",c),a=!0,c.method=="POST"&&(d.state="messageReceived",f.send(c.data))},f.onmessage=function(a){a.data.indexOf("parent.callback")!=-1&&jQuery.atmosphere.log(c.logLevel,["parent.callback no longer supported with 0.8 version and up. Please upgrade"]),d.state="messageReceived",d.status=200;var a=a.data,b=D(a,c,d);b||(Y(),d.responseBody="")},f.onerror=function(){clearTimeout(c.id)},f.onclose=function(b){if(!e){var f=b.reason;if(f==="")switch(b.code){case 1e3:f="Normal closure; the connection successfully completed whatever purpose for which it was created.";break;case 1001:f="The endpoint is going away, either because of a server failure or because the browser is navigating away from the page that opened the connection.";break;case 1002:f="The endpoint is terminating the connection due to a protocol error.";break;case 1003:f="The connection is being terminated because the endpoint received data of a type it cannot accept (for example, a text-only endpoint received binary data).";break;case 1004:f="The endpoint is terminating the connection because a data frame was received that is too large.";break;case 1005:f="Unknown: no status code was provided even though one was expected.";break;case 1006:f="Connection was closed abnormally (that is, with no close frame being sent)."}jQuery.atmosphere.warn("Websocket closed, reason: "+f),jQuery.atmosphere.warn("Websocket closed, wasClean: "+b.wasClean),d.state="closed",d.responseBody="",d.status=a?200:501,Y(),clearTimeout(c.id),e=!0,n?jQuery.atmosphere.log(c.logLevel,["Websocket closed normally"]):a?c.reconnect&&d.transport=="websocket"&&(c.reconnect&&c.maxRequest>m++?(c.requestCount=m,d.responseBody="",B(!0)):(jQuery.atmosphere.log(c.logLevel,["Websocket reconnect maximum try reached "+c.requestCount]),jQuery.atmosphere.warn("Websocket error, reason: "+b.reason),C())):E("Websocket failed. Downgrading to Comet and resending")}},void 0):(f!=null&&f.close(),void 0)}function C(){d.state="error",d.responseBody="",d.status=500,Y()}function D(a,b,c){if(b.trackMessageLength){var d=a.indexOf(b.messageDelimiter),e=c.expectedBodySize;if(d!=-1&&(e=a.substring(0,d),a=a.substring(d+1),c.expectedBodySize=e),d!=-1?c.responseBody=a:c.responseBody+=a,c.responseBody.length!=e)return!0}else c.responseBody=a;return!1}function E(a){jQuery.atmosphere.log(c.logLevel,[a]),c.onTransportFailure!==void 0?c.onTransportFailure(a,c):jQuery.atmosphere.onTransportFailure!==void 0&&jQuery.atmosphere.onTransportFailure(a,c),c.transport=c.fallbackTransport,(c.reconnect&&c.transport!="none"||c.transport==null)&&(c.method=c.fallbackMethod,d.transport=c.fallbackTransport,t())}function F(a){var b=c;a!=null&&a!==void 0&&(b=a);var f=b.url;return b.attachHeadersAsQueryString?f.indexOf("X-Atmosphere-Framework")!=-1?f:(f+=f.indexOf("?")!=-1?"&":"?",f+="X-Atmosphere-tracking-id="+e,f+="&X-Atmosphere-Framework="+jQuery.atmosphere.version,f+="&X-Atmosphere-Transport="+b.transport,b.trackMessageLength&&(f+="&X-Atmosphere-TrackMessageSize=true"),f+=b.lastTimestamp!=void 0?"&X-Cache-Date="+b.lastTimestamp:"&X-Cache-Date=0",b.contentType!=""&&(f+="&Content-Type="+b.contentType),jQuery.each(b.headers,function(c,e){var g=jQuery.isFunction(e)?e.call(this,b,a,d):e;g!=null&&(f+="&"+encodeURIComponent(c)+"="+encodeURIComponent(g))}),f):f}function G(){var a;if(jQuery.browser.msie)for(var b=["Msxml2.XMLHTTP","Microsoft.XMLHTTP"],c=0;b.length>c;c++)try{a=new ActiveXObject(b[c])}catch(d){}else window.XMLHttpRequest&&(a=new XMLHttpRequest);return a}function H(b){var e=c;if((b!=null||b!==void 0)&&(e=b),e.transport=="jsonp"||e.enableXDR&&jQuery.atmosphere.checkCORSSupport())return v(e),void 0;if(e.transport=="ajax")return w(b),void 0;if(e.transport=="streaming"&&jQuery.browser.msie)return e.enableXDR&&window.XDomainRequest?K(e):M(e),void 0;if(e.enableXDR&&window.XDomainRequest)return K(e),void 0;if(e.reconnect&&e.maxRequest>e.requestCount++){var f=G();I(f,e,!0),e.suspend&&(h=f),e.transport!="polling"&&(d.transport=e.transport);var g=!1;jQuery.browser.msie||(f.onerror=function(){g=!0;try{d.status=XMLHttpRequest.status}catch(a){d.status=404}d.state="error",Y(),f.abort(),h=null}),f.onreadystatechange=function(){if(!n){var b=!1,g=!1;if(e.transport=="streaming"&&e.readyState>2&&f.readyState==4)return e.readyState=0,e.lastIndex=0,J(f,e,!0),void 0;if(e.readyState=f.readyState,f.readyState==4?jQuery.browser.msie?g=!0:e.transport=="streaming"?g=!0:e.transport=="long-polling"&&(g=!0,clearTimeout(e.id)):jQuery.browser.msie||f.readyState!=3||f.status!=200||e.transport=="long-polling"?clearTimeout(e.id):g=!0,g){var h=f.responseText;if(!c.dropAtmosphereHeaders)try{var i=f.getResponseHeader("X-Cache-Date");(i!=null||i!=void 0)&&(c.lastTimestamp=i.split(" ").pop())}catch(j){}if(this.previousLastIndex=e.lastIndex,e.transport=="streaming"){var k=h.substring(e.lastIndex,h.length);if(d.isJunkEnded=!0,e.lastIndex==0&&k.indexOf("<!-- Welcome to the Atmosphere Framework.")!=-1&&(d.isJunkEnded=!1),d.isJunkEnded){var p=h.substring(e.lastIndex,h.length);b=D(p,e,d)}else{var l="<!-- EOD -->",m=l.length,o=k.indexOf(l)+m;o>m&&o!=k.length?d.responseBody=k.substring(o):b=!0}if(e.lastIndex=h.length,jQuery.browser.opera&&jQuery.atmosphere.iterate(function(){if(f.responseText.length>e.lastIndex){try{d.status=f.status,d.headers=a(f.getAllResponseHeaders()),c.headers&&jQuery.each(c.headers,function(a){var b=f.getResponseHeader(a);b&&(d.headers[a]=b)})}catch(b){d.status=404}d.state="messageReceived",d.responseBody=f.responseText.substring(e.lastIndex),e.lastIndex=f.responseText.length,Y(),e.transport=="streaming"&&f.responseText.length>e.maxStreamingLength&&(f.abort(),I(f,e,!0))}},0),b)return}else b=D(h,e,d),e.lastIndex=h.length;try{d.status=f.status,d.headers=a(f.getAllResponseHeaders()),c.headers&&jQuery.each(c.headers,function(a){var b=f.getResponseHeader(a);b&&(d.headers[a]=b)})}catch(j){d.status=404}d.state=e.suspend?d.status==0?"closed":"messageReceived":"messagePublished",e.executeCallbackBeforeReconnect||J(f,e,!1),d.responseBody.indexOf("parent.callback")!=-1&&jQuery.atmosphere.log(e.logLevel,["parent.callback no longer supported with 0.8 version and up. Please upgrade"]),Y(),e.executeCallbackBeforeReconnect&&J(f,e,!1),e.transport=="streaming"&&h.length>e.maxStreamingLength&&(f.abort(),I(f,e,!0))}}},f.send(e.data),e.suspend&&(e.id=setTimeout(function(){l&&(f.abort(),q(e),t())},e.timeout)),l=!0}else jQuery.atmosphere.log(e.logLevel,["Max re-connection reached."]),C()}function I(a,b,f){var g=jQuery.atmosphere.prepareURL(b.url);f&&(a.open(b.method,g,!0),b.connectTimeout>-1&&(b.id=setTimeout(function(){b.requestCount==0&&(a.abort(),V("Connect timeout","closed",200,b.transport))},b.connectTimeout))),c.withCredentials&&"withCredentials"in a&&(a.withCredentials=!0),c.dropAtmosphereHeaders||(a.setRequestHeader("X-Atmosphere-Framework",jQuery.atmosphere.version),a.setRequestHeader("X-Atmosphere-Transport",b.transport),b.lastTimestamp!=void 0?a.setRequestHeader("X-Cache-Date",b.lastTimestamp):a.setRequestHeader("X-Cache-Date",0),b.trackMessageLength&&a.setRequestHeader("X-Atmosphere-TrackMessageSize","true"),b.contentType!=""&&a.setRequestHeader("Content-Type",b.contentType),a.setRequestHeader("X-Atmosphere-tracking-id",e),jQuery.each(b.headers,function(c,e){var g=jQuery.isFunction(e)?e.call(this,a,b,f,d):e;g!=null&&a.setRequestHeader(c,g)}))}function J(a,b,c){(c||b.suspend&&a.status==200&&b.transport!="streaming"&&l)&&(u("re-opening",b.transport,b),b.reconnect&&H())}function K(a){j=L(a),j.open()}function L(a){var b=c;a!=null&&a!==void 0&&(b=a);var d="",e=b.transport,f=0,g=function(a){var b=a.responseText,c=!1;if(b.indexOf("<!-- Welcome to the Atmosphere Framework.")!=-1&&(c=!0),c){var d="<!-- EOD -->",g=d.length,h=b.indexOf(d)+g;b=b.substring(h+f),f+=b.length}V(b,"messageReceived",200,e)},h=new window.XDomainRequest,i=b.rewriteURL||function(a){var b=/(?:^|;\s*)(JSESSIONID|PHPSESSID)=([^;]*)/.exec(document.cookie);switch(b&&b[1]){case"JSESSIONID":return a.replace(/;jsessionid=[^\?]*|(\?)|$/,";jsessionid="+b[2]+"$1");case"PHPSESSID":return a.replace(/\?PHPSESSID=[^&]*&?|\?|$/,"?PHPSESSID="+b[2]+"&").replace(/&$/,"")}};return h.onprogress=function(){g(h)},h.onerror=function(){V(h.responseText,"error",500,e)},h.onload=function(){d!=h.responseText&&g(h),b.transport=="long-polling"&&H()},{open:function(){b.method=="POST"&&(b.attachHeadersAsQueryString=!0);var a=F(b);b.method=="POST"&&(a+="&X-Atmosphere-Post-Body="+b.data),h.open(b.method,i(a)),h.send(),b.connectTimeout>-1&&(b.id=setTimeout(function(){b.requestCount==0&&(h.abort(),V("Connect timeout","closed",200,b.transport))},b.connectTimeout))},close:function(){h.abort(),V(h.responseText,"closed",200,e)}}}function M(a){j=N(a),j.open()}function N(a){var b=c;a!=null&&a!==void 0&&(b=a);var e,f=new window.ActiveXObject("htmlfile");f.open(),f.close();var g=b.url;return b.transport!="polling"&&(d.transport=b.transport),{open:function(){var a=f.createElement("iframe");g=F(b),b.data!=""&&(g+="&X-Atmosphere-Post-Body="+b.data),g=jQuery.atmosphere.prepareURL(g),a.src=g,f.body.appendChild(a);var c=a.contentDocument||a.contentWindow.document;e=jQuery.atmosphere.iterate(function(){try{if(!c.firstChild)return;if(c.readyState==="complete")try{jQuery.noop(c.fileSize)}catch(a){return V("Connection Failure","error",500,b.transport),!1}var f=c.body?c.body.lastChild:c,g=function(){var a=f.cloneNode(!0);a.appendChild(c.createTextNode("."));var b=a.innerText,d=!0;if(b.indexOf("<!-- Welcome to the Atmosphere Framework.")==-1&&(d=!1),d){var e="<!-- EOD -->",g=e.length,h=b.indexOf(e)+g;b=b.substring(h)}return b.substring(0,b.length-1)};if(!jQuery.nodeName(f,"pre")){var h=c.head||c.getElementsByTagName("head")[0]||c.documentElement||c,i=c.createElement("script");i.text="document.write('<plaintext>')",h.insertBefore(i,h.firstChild),h.removeChild(i),f=c.body.lastChild}return V(g(),"opening",200,b.transport),e=jQuery.atmosphere.iterate(function(){var a=g();return a.length>b.lastIndex&&(d.status=200,V(a,"messageReceived",200,b.transport),f.innerText="",b.lastIndex=0),c.readyState==="complete"?(V("","re-opening",200,b.transport),M(b),!1):void 0},null),!1}catch(j){jQuery.atmosphere.error(j)}})},close:function(){e&&e(),f.execCommand("Stop"),V("","closed",200,b.transport)}}}function O(a){h!=null||g!=null?P(a):j!=null?Q(a):k!=null?R(a):f!=null&&U(a)}function P(a){var b=T(a);H(b)}function Q(a){P(a)}function R(a){P(a)}function S(a){var b=a;return typeof b=="object"&&(b=a.data),b}function T(a){var b=S(a),d={connected:!1,timeout:6e4,method:"POST",url:c.url,contentType:c.contentType,headers:{},reconnect:!0,callback:null,data:b,suspend:!1,maxRequest:60,logLevel:"info",requestCount:0,transport:"polling"};return typeof a=="object"&&(d=jQuery.extend(d,a)),d}function U(a){var d,b=S(a);try{d=c.webSocketUrl!=null?c.webSocketPathDelimiter+c.webSocketUrl+c.webSocketPathDelimiter+b:b,f.send(d)}catch(e){f.onclose=function(){},f.close(),E("Websocket failed. Downgrading to Comet and resending "+d),P(a)}}function V(a,b,e,f){b=="messageReceived"&&D(a,c,d)||(d.transport=f,d.status=e,d.expectedBodySize==-1&&(d.responseBody=a),d.state=b,Y())}function W(a){X(a,c),X(a,jQuery.atmosphere)}function X(a,b){switch(a.state){case"messageReceived":b.onMessage!==void 0&&b.onMessage(a);break;case"error":b.onError!==void 0&&b.onError(a);break;case"opening":b.onOpen!==void 0&&b.onOpen(a);break;case"messagePublished":b.onMessagePublished!==void 0&&b.onMessagePublished(a);break;case"re-opening":b.onReconnect!==void 0&&b.onReconnect(c,a);break;case"closed":b.onClose!==void 0&&b.onClose(a)}}function Y(){var a=function(a,b){b(d)},b=typeof d.responseBody=="string"?d.responseBody.split(c.messageDelimiter):Array(d.responseBody);for(i=0;b.length>i;i++)if(!(b.length>1&&b[i].length==0)){if(d.responseBody=jQuery.trim(b[i]),W(d),jQuery.atmosphere.callbacks.length>0){jQuery.atmosphere.debug("Invoking "+jQuery.atmosphere.callbacks.length+" global callbacks: "+d.state);try{jQuery.each(jQuery.atmosphere.callbacks,a)}catch(e){jQuery.atmosphere.log(c.logLevel,["Callback exception"+e])}}if(typeof c.callback=="function"){c.logLevel=="debug"&&jQuery.atmosphere.debug("Invoking request callbacks");try{c.callback(d)}catch(e){jQuery.atmosphere.log(c.logLevel,["Callback exception"+e])}}}}function Z(){c.reconnect=!1,d.request=c,l=!1,n=!0,d.state="unsubscribe",d.responseBody="",d.status=408,Y(),$()}function $(){j!=null&&(j.close(),j=null),k!=null&&(k.abort(),k=null),h!=null&&(h.abort(),h=null),f!=null&&(f.close(),f=null),g!=null&&(g.close(),g=null)}var c={timeout:3e5,method:"GET",headers:{},contentType:"",callback:null,url:"",data:"",suspend:!0,maxRequest:60,reconnect:!0,maxStreamingLength:1e7,lastIndex:0,logLevel:"info",requestCount:0,fallbackMethod:"GET",fallbackTransport:"streaming",transport:"long-polling",webSocketImpl:null,webSocketUrl:null,webSocketPathDelimiter:"@@",enableXDR:!1,rewriteURL:!1,attachHeadersAsQueryString:!0,executeCallbackBeforeReconnect:!1,readyState:0,lastTimestamp:0,withCredentials:!1,trackMessageLength:!1,messageDelimiter:"|",connectTimeout:-1,dropAtmosphereHeaders:!1,onError:function(){},onClose:function(){},onOpen:function(){},onMessage:function(){},onReconnect:function(){},onMessagePublished:function(){},onTransportFailure:function(){}},d={status:200,responseBody:"",expectedBodySize:-1,headers:[],state:"messageReceived",transport:"polling",error:null,request:null,id:0},e=0,f=null,g=null,h=null,j=null,k=null,l=!0,m=0,n=!1;q(b),this.subscribe=function(a){q(a),t()},this.execute=function(){t()},this.invokeCallback=function(){Y()},this.close=function(){Z()},this.getUrl=function(){return c.url},this.push=function(a){O(a)},this.response=d},subscribe:function(a,b,c){typeof b=="function"&&jQuery.atmosphere.addCallback(b),typeof a!="string"?c=a:c.url=a;var d=new jQuery.atmosphere.AtmosphereRequest(c);return d.execute(),jQuery.atmosphere.requests[jQuery.atmosphere.requests.length]=d,d},addCallback:function(a){jQuery.inArray(a,jQuery.atmosphere.callbacks)==-1&&jQuery.atmosphere.callbacks.push(a)},removeCallback:function(a){var b=jQuery.inArray(a,jQuery.atmosphere.callbacks);b!=-1&&jQuery.atmosphere.callbacks.splice(b,1)},unsubscribe:function(){if(jQuery.atmosphere.requests.length>0)for(var a=0;jQuery.atmosphere.requests.length>a;a++)jQuery.atmosphere.requests[a].close(),clearTimeout(jQuery.atmosphere.requests[a].id);jQuery.atmosphere.requests=[],jQuery.atmosphere.callbacks=[]},unsubscribeUrl:function(a){var b=-1;if(jQuery.atmosphere.requests.length>0)for(var c=0;jQuery.atmosphere.requests.length>c;c++){var d=jQuery.atmosphere.requests[c];if(d.getUrl()==a){d.close(),clearTimeout(d.id),b=c;break}}b>=0&&jQuery.atmosphere.requests.splice(b,1)},publish:function(a){typeof a.callback=="function"&&jQuery.atmosphere.addCallback(callback),a.transport="polling";var b=new jQuery.atmosphere.AtmosphereRequest(a);return jQuery.atmosphere.requests[jQuery.atmosphere.requests.length]=b,b},checkCORSSupport:function(){if(jQuery.browser.msie&&!window.XDomainRequest)return!0;if(jQuery.browser.opera)return!0;var a=navigator.userAgent.toLowerCase(),b=a.indexOf("android")>-1;return b?!0:!1},S4:function(){return((1+Math.random())*65536|0).toString(16).substring(1)},guid:function(){return jQuery.atmosphere.S4()+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+"-"+jQuery.atmosphere.S4()+jQuery.atmosphere.S4()+jQuery.atmosphere.S4()},prepareURL:function(a){var b=jQuery.now(),c=a.replace(/([?&])_=[^&]*/,"$1_="+b);return c+(c===a?(/\?/.test(a)?"&":"?")+"_="+b:"")},param:function(a){return jQuery.param(a,jQuery.ajaxSettings.traditional)},iterate:function(a,b){var c;return b=b||0,function d(){c=setTimeout(function(){a()!==!1&&d()},b)}(),function(){clearTimeout(c)}},log:function(a,b){if(window.console){var c=window.console[a];typeof c=="function"&&c.apply(window.console,b)}},warn:function(){jQuery.atmosphere.log("warn",arguments)},info:function(){jQuery.atmosphere.log("info",arguments)},debug:function(){jQuery.atmosphere.log("debug",arguments)},error:function(){jQuery.atmosphere.log("error",arguments)}}}(),function(a){function d(a){return'"'+a.replace(b,function(a){var b=c[a];return typeof b=="string"?b:"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4)})+'"'}function e(a){return 10>a?"0"+a:a}function f(a,b){var c,g,h,i,j=b[a],k=typeof j;switch(j&&typeof j=="object"&&typeof j.toJSON=="function"&&(j=j.toJSON(a),k=typeof j),k){case"string":return d(j);case"number":return isFinite(j)?j+"":"null";case"boolean":return j+"";case"object":if(!j)return"null";switch(Object.prototype.toString.call(j)){case"[object Date]":return isFinite(j.valueOf())?'"'+j.getUTCFullYear()+"-"+e(j.getUTCMonth()+1)+"-"+e(j.getUTCDate())+"T"+e(j.getUTCHours())+":"+e(j.getUTCMinutes())+":"+e(j.getUTCSeconds())+"Z"+'"':"null";case"[object Array]":for(h=j.length,i=[],c=0;h>c;c++)i.push(f(c,j)||"null");return"["+i.join(",")+"]";default:i=[];for(c in j)Object.prototype.hasOwnProperty.call(j,c)&&(g=f(c,j),g&&i.push(d(c)+":"+g));return"{"+i.join(",")+"}"}}}var b=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,c={"\b":"\\b","	":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};a.stringifyJSON=function(a){return window.JSON&&window.JSON.stringify?window.JSON.stringify(a):f("",{"":a})}}(jQuery);(function(e){function s(n){t||(t=e(e.message.defaults.template).appendTo(document.body),e(window).bind("mousemove click keypress",o)),t[n?"addClass":"removeClass"]("jquery-error")}function o(){t.is(":visible")&&!t.is(":animated")&&!n&&t.animate({opacity:0},e.message.defaults.fadeOutDuration,function(){e(this).hide()})}var t,n,r,i;e.fn.message=function(u,a){u=e.trim(u||this.text());if(!u)return;clearTimeout(r),clearTimeout(i),s(a),t.find("p").html(u),t.show().animate({opacity:e.message.defaults.opacity},e.message.defaults.fadeInDuration),n=!0,active=!1,r=setTimeout(function(){n=!1},e.message.defaults.minDuration+e.message.defaults.displayDurationPerCharacter*Math.sqrt(u.length)),i=setTimeout(o,e.message.defaults.totalTimeout)},e.message={},e.message.defaults={opacity:.8,fadeOutDuration:500,fadeInDuration:200,displayDurationPerCharacter:125,minDuration:2500,totalTimeout:6e3,template:'<div class="jquery-message"><div class="round"></div><p></p><div class="round"></div></div>'}})(jQuery);(function(a){a.extend(a.fn,{tooltip:function(b){var c={arrowHPosX:"dinamic",animate:0,displaytype:"fade",displaytime:100,arrowUp:"<div class='tooltip-arrow-up'></div>",arrowDown:"<div class='tooltip-arrow-down'></div>",footerTmpl:"<p class='tooltip-footer'>{footer}</p>",bodyTmpl:"<p>{msg}</p>",headTmpl:"<p class='tooltip-head'>{title}</p>",htmlTmpl:"<div class='tooltip hidden {id}' id='{id}'><div class='tooltip-content'>{head}<div class='tooltip-body'>{body}</div>{footer}</div></div>",title:"",msg:null,footer:""},d=a.extend({},c,b),e=function(a,b){var d,c=a;for(d in b)b.hasOwnProperty(d)&&(c=c.replace(RegExp("{"+d+"}","g"),b[d]));return c},f=function(b,c){var i,f="",g=d.msg,h=[];return d.msg?a.isFunction(d.msg)&&(g=d.msg()):g=c.data("tooltipmsg"),a.isArray(g)?(g=[],h=[],a.each(g,function(b,c){a.isPlainObject(c)?h.push(e(d.bodyTmpl,c)):h.push(e(d.bodyTmpl,{msg:c}))}),f=h.join("")):f=a.isPlainObject(g)?e(d.bodyTmpl,g):e(d.bodyTmpl,{msg:g}),i=a(e(d.htmlTmpl,{id:b,head:/^\s*$/.test(d.title)?"":e(d.headTmpl,{title:d.title}),body:g,footer:/^\s*$/.test(d.footer)?"":e(d.footerTmpl,{footer:d.footer})}))},g=function(a,b){var c=a.html();return"up"===b.arrowPos?a.html(d.arrowUp+c):"down"===b.arrowPos&&a.html(c+d.arrowDown),a.find("[class^=tooltip-arrow]").css({"background-position":b.arrowOffsetLeft+" "+b.arrowOffsetTop}),a},h=function(b,c,e){var j,f=b.offset(),g=0>e.pageX-40?0:e.pageX-40+c.width()>a(window).width()?a(window).width()-c.width():e.pageX-40,h=e.pageX-g-10,i={top:f.top-c.height()-10<a(document).scrollTop()?f.top+b.height()+10+d.animate:f.top-c.height()-10-d.animate,left:g,arrowPos:f.top-c.height()-10<a(document).scrollTop()?"up":"down",arrowOffsetLeft:(c.width()-h-10<Math.round(c.width()/2)?Math.round(h/2):h)+"px",arrowOffsetTop:f.top-c.height()-10<a(document).scrollTop()?"-70px":"top"};return("center"===d.arrowHPosX||h+10>=c.width())&&(i.arrowOffsetLeft="center",j=e.pageX-Math.round(c.width()/2),i.left=0>j?0:j+c.width()>a(window).width()?a(window).width()-c.width():j),i},i=function(b,c){c.hideTimeOut=[],0!==c.clearOutTime&&(c.displayed=0),c.clearOutTime=0,b.fadeOut("fast",function(){a(this).remove()})},j=function(){a("[id^=tooltip]").remove()};return this.each(function(){var b=a(this),c={displayed:"",clearOutTime:0,showTimeOut:{},hideTimeOut:{}};b.data({tooltipid:"tooltip_"+Math.floor(1e4*Math.random())}),b.mouseover(function(e){var j=a(this),k=j.data("tooltipid");a("."+k).is(":visible")?(clearTimeout(c.clearOutTime),c.clearOutTime=0):(c.displayed=k,c.showTimeOut[c.displayed]=setTimeout(function(){var p,q,r,s,l=f(k,b),m={tag:"ul","class":"tooltipContent",children:[{tag:"li","class":"delimiter",html:""},{tag:"li","class":"tooltip-movie-info",html:"${title}"},{tag:"li","class":"tooltip-movie-info",html:"${year}"},{tag:"li","class":"tooltip-movie-info",html:"${director}"},{tag:"li","class":"tooltip-movie-info",html:'<a class="tooltip-movie-id" href="#">${id}</a>'}]},n={},o=b.data("tooltipmsg");a("body").append(l),console.log("tooltip added to body");for(p in o)o.hasOwnProperty(p)&&(q=o[p].site,q in n||(n[q]=[]),r=n[q],r.push(o[p]));for(p in n)n.hasOwnProperty(p)&&(a(".tooltip-body").append('<div class="'+p+" site"+'"/>'),a("."+p).append('<p class="tooltip-header">'+p.toUpperCase()+"</p>"),a("."+p).json2html(n[p],m));console.log("json2html done"),s=h(j,l,e),l.css({left:s.left,top:s.top}),l=g(l,s),c.hideTimeOut[c.displayed]=!0,c.clearOutTime=0,"fade"===d.displaytype?l.fadeIn(d.displaytime).animate({top:"up"===s.arrowPos?"-="+d.animate+"px":"+="+d.animate+"px"},{duration:"slow",queue:!1}).mouseover(function(){clearTimeout(c.clearOutTime)}):l.show(d.displaytime),l.mouseout(function(){c.clearOutTime=setTimeout(function(){i(l,c)},250)}).click(function(){i(l,c)})},200))}).mouseout(function(){var d=a(this),e=d.data("tooltipid"),f=a("."+e);clearTimeout(c.showTimeOut[e]),c.hideTimeOut[c.displayed]?c.clearOutTime=setTimeout(function(){i(f,c)},200):(c.clearOutTime=0,c.displayed="")}),a(".scrollable").scroll(function(){j()}),a(window).scroll(function(){j()})})}})})(jQuery);(function($, NS) {
 	/**
 	 * Main Application Namespace.
 	 */

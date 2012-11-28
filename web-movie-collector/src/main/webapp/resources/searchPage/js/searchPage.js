@@ -5,6 +5,7 @@
 		$contentArea:$('.search-results','#searchPage'),
 		$accordion : null,
 		$communicationChannel : null,
+		$request: null,
 		$socket : $.atmosphere,
 		$initialRequest : 0,
 		$addButton : $("button.add",'#searchPage'),
@@ -29,19 +30,23 @@
 		},
 		/**Initializes the communication channel between browser and server*/
 		handshake: function(){
-			var $request = new $.atmosphere.AtmosphereRequest(), that=this;
-			$request.url = 'http://'+document.location.host+'/wmc/searchMovies';
-			$request.contentType = "application/json"; //send json to server
-			$request.dataType = "text";//expect text from server
-			$request.method = "POST";
-	        $request.transport = "websocket";
-	        $request.fallbackTransport = "long-polling";	    
-	        $request.onOpen = $.proxy(this.channelOpened, this);
-	        $request.onReconnect = this.channelReconnected;
-	        $request.onError = this.channelError;
-	        $request.onMessage = this.messageReceived;
+			var that=this;
+			this.$request = new $.atmosphere.AtmosphereRequest();
 			
-	        this.$communicationChannel = this.$socket.subscribe($request);
+			$.extend(this.$request,{
+				url: that.$msg.data('search-url'),
+				contentType:"application/json", //send json to server
+				dataType:"text", //expect text from server
+				method: "GET",
+				transport: "websocket",
+				fallbackTransport: "long-polling",
+				onOpen: $.proxy(that.channelOpened, that),
+				onReconnect: $.proxy(that.channelReconnected,that),
+				onError: $.proxy(that.channelError,that),
+				onMessage: $.proxy(that.messageReceived,that)
+			});
+			
+	        this.$communicationChannel = this.$socket.subscribe(this.$request);
 		},
 		/**
 		 * On Message received (from server) event callback
@@ -63,6 +68,7 @@
 		},
 		/**Called when communication channel has been opened*/
 		channelOpened : function(response){
+			this.$request.method = "POST";
 			this.$addButton.removeAttr('disabled');
 			$().message(this.$msg.data('searchpage.comm.ready'));
 			this.$searchTerm.focus();
@@ -155,7 +161,7 @@
 				spacing_closed:3,
 				north : {
 					resizable : false,
-					closable : false
+					closable : true
 				},
 				south : {
 					resizable : false,
@@ -163,6 +169,11 @@
 				}
 			};
 			this.$ctx.layout(cfgLayout);
+			$('#header').layout($.extend({},cfgLayout,{
+				east:{
+					size:20 + $('span.locale-changer').width()
+				}
+			}));
 			$('.layout-inner').layout($.extend({},cfgLayout,{
 				east:{
 					size:0.66

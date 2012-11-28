@@ -1,1 +1,1 @@
-page footer
+<spring:message code="footer.text"/>

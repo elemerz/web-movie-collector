@@ -12,6 +12,7 @@
 		<org.aspectj-version>1.6.9</org.aspectj-version>
 		<application.contextpath>/</application.contextpath>
 		<application.port>8080</application.port>
+		<atmosphere.version>1.0.4</atmosphere.version>
 		<org.slf4j-version>1.5.10</org.slf4j-version>
 		<css-selectors-version>1.0.4</css-selectors-version>
 		<wro4j.version>1.6.0</wro4j.version>		
@@ -105,7 +106,7 @@
 		<dependency>
 			<groupId>org.atmosphere</groupId>
 			<artifactId>atmosphere-runtime</artifactId>
-			<version>1.0.4</version>
+			<version>${atmosphere.version}</version>
 		</dependency>
 		<!-- AspectJ -->
 		<dependency>
@@ -257,7 +258,7 @@
 			    </executions>
 			    <configuration>
 			     <minimize>false</minimize>
-			     <targetGroups>searchPage</targetGroups>
+			     <!--targetGroups>searchPage</targetGroups-->
 			     <destinationFolder>${basedir}/src/main/webapp/resources/wro</destinationFolder>
 			     <contextFolder>${basedir}/src/main/webapp/</contextFolder>
 			     <wroFile>${basedir}/src/main/webapp/WEB-INF/wro.xml</wroFile>

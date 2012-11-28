@@ -1,41 +1,53 @@
+/**UI Layout plugin customizations*/
+
+#searchPage{
+	font:1em/100% 'SegoeUI-Light',sans-serif;	
+}
+.ui-layout-pane {
+	background:#666;
+}
+
 #searchPage h2 {
-	font-weight: bold;
-	padding-top: 5px;	
-	padding-bottom: 5px;	
-	padding-left: 100px;
-	font-size: 50px;
-	font-family: 'Myriad Pro', 'Myriad', helvetica, arial, sans-serif;
-	text-decoration: none;
 	color: #ffffff;
-	-webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), color-stop(50%, rgba(0,0,0,0)), to(rgba(0,0,0,1)));
-	text-shadow: 0 2px 0 #e9e9e9;
-	text-shadow: 2px 3px 3px #292929;
+	font:bold 50px/100% "Comic Sans MS",sans-serif;	
 	letter-spacing: 10px;
+	overflow:hidden;
+	padding: 5px 0 20px 100px;	
+	text-decoration: none;
+	text-shadow: 2px 3px 3px #292929;
+	-webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), color-stop(50%, rgba(0,0,0,0)), to(rgba(0,0,0,1)));
 }
-#searchPage .inputs .user-input {
-	float:left;
-	height: 90%;
-	width:75%;
+
+#searchPage  .user-input-zone {
+	background: #dcdcdc;
 }
-#searchPage .inputs button.user-input {
+
+#searchPage  .user-input {
+	float: left;
+	height: 100%;
+	width: 70%;
+}
+#searchPage  button.user-input {
 	float:right;
 	height: 100%;
-	width:24.5%;
+	width: 28.5%;
 }
-#searchPage .inputs .movie-title {
-	border:1px solid #bbb;
-	font-size:150%;
+#searchPage  .movie-title {
+	background:#fff;
+	border: 1px solid #bbb;
+	font-size: 220%;
+	padding-left: 15px;
 }
 #searchPage .info-sources li{
 	float:left;
 }
 .right {
+	color: #fff;
 	padding-top: 10px;
 	padding-right: 10px;
-	color: #ffffff;
 }
 .right a {
-	color: #ffffff;
+	color: #fff;
 	text-decoration: none;
 }
 .right a:hover {
@@ -46,12 +58,63 @@
 	overflow-y: hidden;
 }
 #main-section ul {
-		background: #CCCCCC;
+		background: #ccc;
 }
 #main-section header label {
-}
-#main-section header div{
+	color: #fff;
+	font-family:Comic Sans MS;
+	font-size: 30px;
+	font-weight: bold;
+	letter-spacing: 3px;
+	padding: 25px 0 0 45px;	
+	text-decoration: none;
+    text-shadow: 0 2px 0 #e9e9e9;
+	text-shadow: 2px 3px 3px #292929;
 }
 #main-section aside {
-		background: #CCCCCC;
+	background: #ccc;
+}
+.search-button {
+	background: -moz-linear-gradient(top,  #2989d8 0%, #207cca 41%, #1e5799 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#2989d8), color-stop(41%,#207cca), color-stop(100%,#1e5799)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #2989d8 0%,#207cca 41%,#1e5799 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #2989d8 0%,#207cca 41%,#1e5799 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #2989d8 0%,#207cca 41%,#1e5799 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #2989d8 0%,#207cca 41%,#1e5799 100%); /* W3C */
+	background: #2989d8; /* Old browsers */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2989d8', endColorstr='#1e5799',GradientType=0 ); /* IE6-9 */	
+
+	-moz-box-shadow:inset 0px 1px 30px -2px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 30px -2px #ffffff;
+	box-shadow:inset 0px 1px 30px -2px #ffffff;
+	
+	border:1px solid #aaa;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+
+	color: #fff;
+	display:inline-block;
+	font-family:Comic Sans MS;
+	font-size:33px;
+	font-weight:bold;
+	letter-spacing: 3px;	
+	text-decoration:none;
+    text-shadow: 0 2px 0 #e9e9e9;
+	text-shadow: 2px 3px 3px #292929;
+}
+
+.search-button:hover {
+	background: #80afd6; /* Old browsers */
+	background: -moz-linear-gradient(top,  #80afd6 0%, #207cca 99%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#80afd6), color-stop(99%,#207cca)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #80afd6 0%,#207cca 99%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #80afd6 0%,#207cca 99%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #80afd6 0%,#207cca 99%); /* IE10+ */
+	background: linear-gradient(to bottom,  #80afd6 0%,#207cca 99%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#80afd6', endColorstr='#207cca',GradientType=0 ); /* IE6-9 */	
+}
+.search-button:active {
+	position:relative;
+	top:1px;
 }

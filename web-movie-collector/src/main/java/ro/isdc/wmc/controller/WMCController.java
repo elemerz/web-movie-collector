@@ -68,6 +68,13 @@ public class WMCController extends LocaleAwareController{
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
+	@RequestMapping(value = "/searchMovies", method = RequestMethod.GET)
+	public void openConnection(AtmosphereResource atmosphereResource, @RequestBody String searchModelAsJson) throws JsonGenerationException, JsonMappingException, IOException {
+		System.out.println("proxy host: " + System.getProperty("http.proxyHost"));
+		System.out.println("proxy port: " + System.getProperty("http.proxyPort"));
+		AtmosphereUtil.suspend(atmosphereResource); 
+	}
+	
 	@RequestMapping(value = "/searchMovies", method = RequestMethod.POST)
 	@ResponseBody
 	public void srcMoviesAtm(AtmosphereResource atmosphereResource, @RequestBody String searchModelAsJson) throws JsonGenerationException, JsonMappingException, IOException {
@@ -86,8 +93,6 @@ public class WMCController extends LocaleAwareController{
 			e.printStackTrace();
 		}
 		}
-		
-		
 	}
 	
 	/**

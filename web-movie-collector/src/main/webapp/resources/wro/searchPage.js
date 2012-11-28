@@ -163,6 +163,11 @@
 				}
 			};
 			this.$ctx.layout(cfgLayout);
+			$('#header').layout($.extend({},cfgLayout,{
+				east:{
+					size:0.5
+				}
+			}));
 			$('.layout-inner').layout($.extend({},cfgLayout,{
 				east:{
 					size:0.66

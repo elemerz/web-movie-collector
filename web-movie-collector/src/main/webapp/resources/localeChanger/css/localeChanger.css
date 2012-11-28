@@ -1,3 +1,6 @@
+.locale-changer {
+	float:right;
+}
 .locale-changer .locale {
 	padding:3px 0 3px 25px;
 	line-height:25px;
@@ -49,5 +52,5 @@
 .locale-changer .vi{ background-position: 0 -3108px;} /*Vietnam*/ 
 
 .locale-changer label.current-lng{
-	border:2px inset #aaa;
+	border:2px inset #367;
 } 
